@@ -41,13 +41,45 @@ function Tickets() {
   const [totalCount, setTotalCount] = useState(0);
   const [realtimeTick, setRealtimeTick] = useState(0);
 
-  // FIFO feedback queue — each closed ticket gets a modal in order
-  const [feedbackQueue, setFeedbackQueue] = useState([]);
+  // Per-user localStorage keys derived synchronously from JWT
+  const [feedbackStorageKey, feedbackGivenKey] = useMemo(() => {
+    try {
+      const id = jwtDecode(localStorage.getItem("authToken") || "").id;
+      return [`feedbackQueue_${id}`, `feedbackGiven_${id}`];
+    } catch {
+      return ["feedbackQueue", "feedbackGiven"];
+    }
+  }, []);
+
+  // Set of ticket IDs where user already answered — prevents re-queuing answered tickets
+  const getFeedbackGiven = () => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(feedbackGivenKey) || "[]"));
+    } catch {
+      return new Set();
+    }
+  };
+  const markFeedbackGiven = (ticketId) => {
+    const given = getFeedbackGiven();
+    given.add(ticketId);
+    localStorage.setItem(feedbackGivenKey, JSON.stringify([...given]));
+  };
+
+  // FIFO feedback queue — persisted to localStorage so refresh doesn't lose pending modals
+  const [feedbackQueue, setFeedbackQueue] = useState(() => {
+    try {
+      const given = getFeedbackGiven();
+      const saved = JSON.parse(localStorage.getItem(feedbackStorageKey) || "[]");
+      return saved.filter((t) => !given.has(t.id));
+    } catch {
+      return [];
+    }
+  });
 
   // IDs we know were open on the current page — used to detect admin-closes via realtime
   const prevOpenIdsRef = useRef(new Set());
-  // IDs already queued for feedback — prevents duplicates
-  const queuedIdsRef = useRef(new Set());
+  // IDs already queued for feedback — seeded from persisted queue to survive refresh
+  const queuedIdsRef = useRef(new Set(feedbackQueue.map((t) => t.id)));
 
   const isClosedFilter = filter === "Closed Tickets";
 
@@ -88,7 +120,11 @@ function Tickets() {
     if (queuedIdsRef.current.has(ticket.id)) return;
     queuedIdsRef.current.add(ticket.id);
     prevOpenIdsRef.current.delete(ticket.id);
-    setFeedbackQueue((q) => [...q, ticket]);
+    setFeedbackQueue((q) => {
+      const next = [...q, ticket];
+      localStorage.setItem(feedbackStorageKey, JSON.stringify(next));
+      return next;
+    });
   };
 
   const handleActionClick = async (ticket) => {
@@ -143,9 +179,17 @@ function Tickets() {
     }
   };
 
+  const handleFeedbackSubmit = (ticketId) => {
+    markFeedbackGiven(ticketId);
+  };
+
   // Pop the front of the queue — next ticket's modal auto-shows if queue non-empty
   const handleFeedbackClose = () => {
-    setFeedbackQueue((q) => q.slice(1));
+    setFeedbackQueue((q) => {
+      const next = q.slice(1);
+      localStorage.setItem(feedbackStorageKey, JSON.stringify(next));
+      return next;
+    });
   };
 
   const userId = useMemo(() => {
@@ -252,6 +296,29 @@ function Tickets() {
     return () => realtimeSupabase.removeChannel(channel);
   }, [userId]);
 
+  // On mount: catch tickets closed while user was offline/logged out
+  useEffect(() => {
+    if (!userId) return;
+    const checkMissedCloses = async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data } = await realtimeSupabase
+        .from("Tickets")
+        .select("id, Summary, Description, Category, closed_at")
+        .eq("created_by", userId)
+        .not("closed_at", "is", null)
+        .gte("closed_at", sevenDaysAgo)
+        .order("closed_at", { ascending: true });
+      if (!data) return;
+      const given = getFeedbackGiven();
+      data.forEach((t) => {
+        if (!given.has(t.id) && !queuedIdsRef.current.has(t.id)) {
+          enqueueForFeedback(t);
+        }
+      });
+    };
+    checkMissedCloses();
+  }, [userId]);
+
   const handleSearch = (val) => {
     setSearch(val);
     setPage(0);
@@ -324,7 +391,7 @@ function Tickets() {
         <FeedbackModal
           key={feedbackQueue[0].id}
           ticket={feedbackQueue[0]}
-          onSubmit={() => {}}
+          onSubmit={() => handleFeedbackSubmit(feedbackQueue[0].id)}
           onClose={handleFeedbackClose}
         />
       )}
