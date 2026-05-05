@@ -24,14 +24,16 @@ CORE DIRECTIVES:
 OUTPUT FORMAT — respond with valid JSON only, no other text:
 {
   "answer": "your full response here",
-  "suggestions": ["short follow-up question 1", "short follow-up question 2"]
+  "suggestions": ["How do I reset my LMS password?", "Where can I find my student ID?"]
 }
 
 SUGGESTION RULES:
-- Generate exactly 2 follow-up questions a student would naturally ask next about this topic.
+- Generate up to 5 follow-up questions a student would naturally ask next about this topic.
+- EVERY suggestion MUST be phrased as a question the user would type — end with "?".
+- Must read like a user asking, NOT a topic label or answer (e.g. "How do I enable MFA?" not "MFA setup").
 - They can be different aspects or deeper steps of the SAME topic — not required to be different topics.
 - Do NOT repeat anything from ALREADY DISCUSSED.
-- Max 10 words each. Must be a specific, actionable question.
+- Max 10 words each.
 - Only use an empty array if the knowledge base has zero relevant content at all.`;
 
 async function fetchWithTimeout(url, options = {}) {
@@ -164,7 +166,7 @@ function parseJsonReply(raw) {
       ? parsed.suggestions
           .filter((s) => typeof s === "string" && s.trim().length > 3)
           .map((s) => s.trim())
-          .slice(0, 2)
+          .slice(0, 5)
       : [];
     if (!answer) {
       console.warn("[Chatbot] JSON parsed but 'answer' field missing. Raw:", cleaned.slice(0, 200));
@@ -191,10 +193,11 @@ function extractChunkQuestions(chunks, skipText) {
       const lower = clean.toLowerCase();
       if (seen.has(lower) || skipLower.includes(lower.slice(0, 20))) continue;
       seen.add(lower);
-      // Prefer explicit questions; accept short instructional phrases too
-      const asQ = clean.endsWith("?") ? clean : `How do I ${clean.toLowerCase()}?`;
+      // Only keep lines already phrased as questions; skip statements
+      if (!clean.endsWith("?")) continue;
+      const asQ = clean;
       out.push(asQ);
-      if (out.length >= 2) return out;
+      if (out.length >= 5) return out;
     }
   }
   return out;
