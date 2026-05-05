@@ -252,6 +252,14 @@ export const initializeDatabase = async () => {
             ) THEN
               ALTER TABLE "Tickets" ADD COLUMN status TEXT DEFAULT 'Open';
             END IF;
+
+            IF NOT EXISTS (
+              SELECT 1
+              FROM information_schema.columns
+              WHERE table_name = 'Tickets' AND column_name = 'satisfaction'
+            ) THEN
+              ALTER TABLE "Tickets" ADD COLUMN satisfaction BOOLEAN;
+            END IF;
           END
           $$;
         `,

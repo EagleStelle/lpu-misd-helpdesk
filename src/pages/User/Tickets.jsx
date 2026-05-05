@@ -64,6 +64,11 @@ function Tickets() {
     given.add(ticketId);
     localStorage.setItem(feedbackGivenKey, JSON.stringify([...given]));
   };
+  const removeFeedbackGiven = (ticketId) => {
+    const given = getFeedbackGiven();
+    given.delete(ticketId);
+    localStorage.setItem(feedbackGivenKey, JSON.stringify([...given]));
+  };
 
   // FIFO feedback queue — persisted to localStorage so refresh doesn't lose pending modals
   const [feedbackQueue, setFeedbackQueue] = useState(() => {
@@ -131,8 +136,12 @@ function Tickets() {
     if (!ticket) return;
     const isCurrentlyClosed = !!ticket.closed_at;
     if (isCurrentlyClosed) {
-      // Reopening — no feedback
-      await toggleTicketStatus(ticket, false);
+      // Reopening — reset feedback state so next close triggers modal again
+      const ok = await toggleTicketStatus(ticket, false);
+      if (ok) {
+        removeFeedbackGiven(ticket.id);
+        queuedIdsRef.current.delete(ticket.id);
+      }
     } else {
       // Close ticket first, then queue feedback modal
       const ok = await toggleTicketStatus(ticket, true);
@@ -179,8 +188,21 @@ function Tickets() {
     }
   };
 
-  const handleFeedbackSubmit = (ticketId) => {
+  const handleFeedbackSubmit = async (ticketId, satisfied) => {
     markFeedbackGiven(ticketId);
+    try {
+      const token = localStorage.getItem("authToken");
+      await fetch(`${getApiBaseUrl()}/api/tickets/${ticketId}/feedback`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ satisfaction: satisfied }),
+      });
+    } catch {
+      // fire-and-forget — localStorage already guards against re-showing
+    }
   };
 
   // Pop the front of the queue — next ticket's modal auto-shows if queue non-empty
@@ -391,7 +413,7 @@ function Tickets() {
         <FeedbackModal
           key={feedbackQueue[0].id}
           ticket={feedbackQueue[0]}
-          onSubmit={() => handleFeedbackSubmit(feedbackQueue[0].id)}
+          onSubmit={(satisfied) => handleFeedbackSubmit(feedbackQueue[0].id, satisfied)}
           onClose={handleFeedbackClose}
         />
       )}

@@ -245,9 +245,14 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
         .status(400)
         .json({ success: false, message: "status is required" });
 
+    const isReopening = status === "Open";
     let query = supabase
       .from("Tickets")
-      .update({ status, closed_at: closed_at ?? null })
+      .update({
+        status,
+        closed_at: closed_at ?? null,
+        ...(isReopening && { satisfaction: null }),
+      })
       .eq("id", ticketId);
 
     if (req.user.app_role !== "admin") {
@@ -263,6 +268,35 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
         .status(404)
         .json({ success: false, message: "Ticket not found or access denied" });
     }
+    return res.json({ success: true, data: data[0] });
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// PATCH /api/tickets/:id/feedback — record user satisfaction (ticket owner only)
+router.patch("/:id/feedback", authMiddleware, async (req, res) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId))
+      return res.status(400).json({ success: false, message: "Invalid ticket ID" });
+
+    const { satisfaction } = req.body;
+    if (typeof satisfaction !== "boolean")
+      return res.status(400).json({ success: false, message: "satisfaction must be a boolean" });
+
+    const { data, error } = await supabase
+      .from("Tickets")
+      .update({ satisfaction })
+      .eq("id", ticketId)
+      .eq("created_by", req.user.id)
+      .select();
+
+    if (error)
+      return res.status(400).json({ success: false, message: error.message });
+    if (!data || data.length === 0)
+      return res.status(404).json({ success: false, message: "Ticket not found or access denied" });
+
     return res.json({ success: true, data: data[0] });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
