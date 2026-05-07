@@ -71,34 +71,6 @@ export async function embedText(text) {
   return vector;
 }
 
-async function expandQuery(userMessage) {
-  try {
-    const url = "https://openrouter.ai/api/v1/chat/completions";
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-flash-1.5-8b",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Rewrite this IT support question into a 1-sentence technical search query. Focus on the core intent.",
-          },
-          { role: "user", content: userMessage },
-        ],
-        max_tokens: 50,
-      }),
-    });
-    const data = await response.json();
-    return data?.choices?.[0]?.message?.content || userMessage;
-  } catch {
-    return userMessage;
-  }
-}
 
 async function searchKnowledge(userMessage) {
   try {

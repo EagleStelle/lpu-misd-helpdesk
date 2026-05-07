@@ -81,7 +81,7 @@ export const initializeDatabase = async () => {
           $$;
         `,
       });
-      console.log("✓ auth_users user_type/department columns ready");
+      console.log("✓ auth_users");
     } catch (migrateErr) {
       console.warn("auth_users user_type/department migration skipped:", migrateErr.message);
     }
@@ -305,7 +305,7 @@ export const initializeDatabase = async () => {
           },
         );
         if (createErr) throw createErr;
-        console.log("✓ Created storage bucket: ticket-attachments");
+        console.log("✓ ticket-attachments (bucket created)");
       }
     } catch (storageErr) {
       console.warn(
@@ -332,7 +332,7 @@ export const initializeDatabase = async () => {
           CREATE INDEX IF NOT EXISTS idx_chatbot_sessions_user_id ON chatbot_sessions(user_id);
         `,
       });
-      console.log("✓ chatbot_sessions table ready");
+      console.log("✓ chatbot_sessions");
     } catch (chatbotInitError) {
       console.warn("chatbot_sessions init skipped:", chatbotInitError.message);
     }
@@ -353,7 +353,7 @@ export const initializeDatabase = async () => {
             ON chatbot_messages(session_id, created_at);
         `,
       });
-      console.log("✓ chatbot_messages table ready");
+      console.log("✓ chatbot_messages");
     } catch (chatbotMsgsInitError) {
       console.warn("chatbot_messages init skipped:", chatbotMsgsInitError.message);
     }
@@ -387,7 +387,7 @@ export const initializeDatabase = async () => {
             ON chatbot_account_limits(user_id);
         `,
       });
-      console.log("✓ chatbot_account_limits table ready");
+      console.log("✓ chatbot_account_limits");
     } catch (limiterInitError) {
       console.warn(
         "chatbot_account_limits init skipped:",
@@ -441,7 +441,7 @@ export const initializeDatabase = async () => {
           $$;
         `,
       });
-      console.log("✓ knowledge_base table + search_knowledge_base RPC ready");
+      console.log("✓ knowledge_base");
     } catch (knowledgeInitError) {
       console.warn("knowledge_base init skipped:", knowledgeInitError.message);
     }
@@ -463,7 +463,7 @@ export const initializeDatabase = async () => {
             ON ticket_sla_history(ticket_id, closed_at DESC);
         `,
       });
-      console.log("✓ ticket_sla_history table ready");
+      console.log("✓ ticket_sla_history");
     } catch (slaInitError) {
       console.warn("ticket_sla_history init skipped:", slaInitError.message);
     }
@@ -548,12 +548,12 @@ export const initializeDatabase = async () => {
           ALTER TABLE chatbot_account_limits ENABLE ROW LEVEL SECURITY;
         `,
       });
-      console.log("✓ RLS policies applied");
+      console.log("✓ RLS policies");
     } catch (rlsError) {
       console.warn("RLS policy setup skipped:", rlsError.message);
     }
 
-    console.log("✓ Database initialized");
+    console.log("✓ Database ready");
   } catch (error) {
     console.error("Database initialization error:", error.message);
   }
@@ -738,7 +738,7 @@ export const initializeAdminUsers = async () => {
     }
 
     if (existing && existing.length > 0) {
-      console.log("✓ Mock admin already exists");
+      console.log(`✓ admin_users (seed: ${seedEmail})`);
       return;
     }
 
@@ -760,7 +760,7 @@ export const initializeAdminUsers = async () => {
       return;
     }
 
-    console.log(`✓ Mock admin created (${seedEmail})`);
+    console.log(`✓ admin_users (seed created: ${seedEmail})`);
   } catch (error) {
     console.error("Admin initialization error:", error.message);
   }

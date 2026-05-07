@@ -153,43 +153,17 @@ const start = async () => {
     return "127.0.0.1";
   };
   const lanIp = getLanIP();
-  const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
-  const publicBase = process.env.PUBLIC_BASE_URL || vercelUrl || "";
   const corsList = (process.env.CORS_ORIGINS || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean)
     .join(", ") || "(none)";
-  const dbUrl =
-    process.env.DATABASE_URL ||
-    process.env.VITE_SUPABASE_URL ||
-    process.env.SUPABASE_URL ||
-    "(not set)";
-  const dbKind = process.env.DATABASE_URL
-    ? "postgresql"
-    : process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
-      ? "supabase"
-      : "unknown";
-
-  // Admin invite email debug (never print secrets)
-  const adminInviteDebug = String(process.env.ADMIN_INVITE_DEBUG || "").trim().toLowerCase() === "true";
-  const smtpHost = String(process.env.ADMIN_INVITE_SMTP_HOST || "").trim();
-  const smtpPort = Number(process.env.ADMIN_INVITE_SMTP_PORT || 587);
-  const smtpSecure =
-    String(process.env.ADMIN_INVITE_SMTP_SECURE || "").trim().toLowerCase() === "true" || smtpPort === 465;
-  const smtpUserPresent = Boolean(String(process.env.ADMIN_INVITE_SMTP_USER || "").trim());
-  const smtpPassPresent = Boolean(String(process.env.ADMIN_INVITE_SMTP_PASS || "").trim());
-  const smtpConfigured = Boolean(smtpHost) && smtpUserPresent && smtpPassPresent;
-  const resendApiKeyPresent = Boolean(String(process.env.RESEND_API_KEY || "").trim());
-  const inviteEnabled = smtpConfigured || resendApiKeyPresent;
+  const dbKind = process.env.SUPABASE_SERVICE_ROLE_KEY ? "supabase (service_role)" : "supabase (anon)";
 
   try {
     await initializeDatabase();
     await initializeAdminUsers();
     app.listen(PORT, "0.0.0.0", () => {
-      const inviteStatus = inviteEnabled
-        ? `enabled (${smtpConfigured ? "SMTP" : ""}${smtpConfigured && resendApiKeyPresent ? "+" : ""}${resendApiKeyPresent ? "Resend" : ""})`
-        : "disabled";
       console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   LPU MISD Auth Backend  ·  port ${PORT}
@@ -197,10 +171,8 @@ const start = async () => {
   Local   →  http://localhost:${PORT}
   Health  →  http://localhost:${PORT}/health
   LAN     →  http://${lanIp}:${PORT}
-  Public  →  ${publicBase || "(none)"}
   CORS    →  ${corsList}
   DB      →  ${dbKind}
-  Invite  →  ${inviteStatus}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);
     });
