@@ -322,7 +322,6 @@ export const initializeDatabase = async () => {
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             session_id TEXT NOT NULL UNIQUE,
             user_id UUID,
-            messages JSONB DEFAULT '[]'::jsonb,
             status TEXT DEFAULT 'active' CHECK (status IN ('active', 'resolved', 'transferred')),
             created_at TIMESTAMPTZ DEFAULT NOW(),
             updated_at TIMESTAMPTZ DEFAULT NOW()
