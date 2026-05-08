@@ -251,7 +251,10 @@ const SidePanel = ({ collapsed, onToggleCollapse, onAccountMenuChange }) => {
             </div>
           </button>
 
-          <button onClick={handleLogout} className={`${navItemBase} ${inactiveClass}`}>
+          <button
+            onClick={handleLogout}
+            className={`${navItemBase} ${inactiveClass}`}
+          >
             <LogOut
               size={22}
               className={`shrink-0 md:w-7 md:h-7 md:absolute md:top-1/2 md:-translate-y-1/2 md:transition-[left,transform] md:duration-500 md:ease-[cubic-bezier(0.22,1,0.36,1)] ${desktopIconAnchor}`}
@@ -270,7 +273,10 @@ const SidePanel = ({ collapsed, onToggleCollapse, onAccountMenuChange }) => {
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-44 bg-white rounded-xl shadow-xl py-2 border border-gray-100 flex flex-col z-50">
               <button
                 type="button"
-                onClick={() => { setProfileOpen(true); toggleAccountMenu(false); }}
+                onClick={() => {
+                  setProfileOpen(true);
+                  toggleAccountMenu(false);
+                }}
                 className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-lpu-maroon transition-colors w-full text-left"
               >
                 <UserCog size={16} />

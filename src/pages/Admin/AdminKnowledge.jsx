@@ -16,6 +16,7 @@ import { SearchInput } from "../../components/Controls";
 import {
   PrimaryButton,
   SecondaryButton,
+  FloatingInput,
   FloatingTextarea,
 } from "../../components/FormFields";
 import { FormModal } from "../../components/Modal";
@@ -43,19 +44,17 @@ function EntryForm({
 }) {
   return (
     <div className="px-5 py-6 flex flex-col gap-5">
-      <FloatingTextarea
+      <FloatingInput
         label="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        heightClass="h-[54px]"
         required={false}
       />
       <FloatingTextarea
         label="Content (Required)"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        heightClass="h-[260px]"
-        required={true}
+        heightClass="h-[40vh] md:h-[clamp(300px,55vh,800px)]"
       />
       {error && (
         <div className="text-xs text-red-800 dark:text-red-400 px-3 py-2 bg-red-50 dark:bg-red-950/20 rounded-md border border-red-100 dark:border-red-900/30">

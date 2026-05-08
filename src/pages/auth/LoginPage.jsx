@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { Eye, EyeOff, Mail } from "lucide-react";
 import { getApiBaseUrl } from "../../utils/apiBaseUrl";
 import supabaseAuth from "../../lib/supabaseAuthClient";
 import { realtimeSupabase } from "../../lib/realtimeSupabaseClient";
+import { PrimaryButton, FloatingInput } from "../../components/FormFields";
 
 const LoginPage = () => {
   const [mode, setMode] = useState("magic"); // "magic" | "admin"
@@ -42,7 +43,7 @@ const LoginPage = () => {
     setEmailSent(false);
   };
 
-  // ── Student magic-link flow ─────────────────────────────────────────────
+  // Student magic-link flow
   const handleMagicLink = async (e) => {
     e.preventDefault();
     setError("");
@@ -75,7 +76,7 @@ const LoginPage = () => {
     }
   };
 
-  // ── Admin password flow ─────────────────────────────────────────────────
+  // Admin password flow
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -113,42 +114,45 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-6 font-poppins bg-[radial-gradient(1200px_700px_at_20%_15%,#ffffff_0%,#f3f3f3_45%,#ededed_100%)]">
-      <div className="w-full max-w-245 rounded-[18px] overflow-hidden flex flex-col md:grid md:grid-cols-[1.25fr_1fr] shadow-[0_18px_50px_rgba(0,0,0,0.18)] bg-lpu-maroon">
-        {/* Image Side - Visible on all devices */}
+    <div className="h-screen flex items-center justify-center p-4 md:p-6 font-poppins bg-[#F7F6F3]">
+      <div className="w-full max-w-6xl rounded-2xl overflow-hidden flex flex-col md:grid md:grid-cols-2 shadow-[0_8px_40px_rgba(0,0,0,0.10)] border-t-6 border-lpu-maroon ">
+        {/* Image Side */}
         <div
-          className="relative h-48 md:h-auto bg-gray-300 bg-[url('/lpu-building.jpg')] bg-center bg-cover bg-no-repeat after:content-[''] after:absolute after:inset-0 after:bg-lpu-maroon/30"
+          className="relative h-36 md:min-h-130 w-full bg-gray-200 bg-[url('/lpu-building.jpg')] bg-center bg-cover bg-no-repeat after:content-[''] after:absolute after:inset-0 after:bg-[#1a0000]/40"
           aria-hidden="true"
         />
 
         {/* Form Side */}
-        <div className="bg-lpu-maroon p-8 md:p-16 flex flex-col justify-center gap-6">
-          <div className="text-center">
-            <h1 className="text-white text-3xl md:text-5xl font-bold tracking-wider leading-none m-0">
-              WELCOME
-            </h1>
-            <p className="mt-2.5 text-white/90 text-[10px] md:text-xs tracking-[0.22em] uppercase">
-              TO LPU-L MISD HELP DESK
+        <div className="bg-white p-5 md:p-12 flex flex-col justify-center h-full gap-4 md:gap-8">
+          <div>
+            <p className="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-2 md:mb-3">
+              LPU-L MISD Help Desk
             </p>
+            <h1 className="text-3xl md:text-5xl font-black text-black m-0 tracking-tight">
+              Welcome
+            </h1>
           </div>
 
           {/* Mode Toggle */}
-          <div className="relative flex bg-black/20 rounded-xl p-1 border border-white/70 w-full">
-            <div
-              className={`absolute top-1 left-1 w-[calc(50%-4px)] h-[calc(100%-8px)] bg-white rounded-lg transition-transform duration-300 ease-in-out z-10 ${
-                mode === "admin" ? "translate-x-full" : "translate-x-0"
-              }`}
-            />
+          <div className="flex bg-gray-100 rounded-full p-1 h-10 md:h-12">
             <button
               type="button"
-              className={`flex-1 py-2.5 z-20 font-semibold text-[13px] uppercase tracking-wider transition-colors duration-300 ${mode === "magic" ? "text-lpu-maroon" : "text-white/70"}`}
+              className={`flex-1 flex items-center justify-center h-full px-3 md:px-6 rounded-full text-xs md:text-sm font-bold uppercase transition-all duration-300 cursor-pointer ${
+                mode === "magic"
+                  ? "bg-lpu-maroon text-white shadow-sm"
+                  : "text-gray-500 hover:text-lpu-maroon"
+              }`}
               onClick={() => switchMode("magic")}
             >
               User
             </button>
             <button
               type="button"
-              className={`flex-1 py-2.5 z-20 font-semibold text-[13px] uppercase tracking-wider transition-colors duration-300 ${mode === "admin" ? "text-lpu-maroon" : "text-white/70"}`}
+              className={`flex-1 flex items-center justify-center h-full px-3 md:px-6 rounded-full text-xs md:text-sm font-bold uppercase transition-all duration-300 cursor-pointer ${
+                mode === "admin"
+                  ? "bg-lpu-maroon text-white shadow-sm"
+                  : "text-gray-500 hover:text-lpu-maroon"
+              }`}
               onClick={() => switchMode("admin")}
             >
               Admin
@@ -156,90 +160,99 @@ const LoginPage = () => {
           </div>
 
           {error && (
-            <div className="bg-lpu-gold text-lpu-maroon border border-white/70 p-3 rounded-lg text-sm font-bold text-center shadow-lg animate-in fade-in zoom-in duration-300">
+            <div className="bg-[#FDEBEC] text-[#9F2F2D] border border-[#9F2F2D]/15 px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-medium">
               {error}
             </div>
           )}
 
           {/* Forms */}
-          <div className="w-full">
+          <div className="w-full flex flex-col justify-center">
             {mode === "magic" && !emailSent && (
-              <form onSubmit={handleMagicLink} className="flex flex-col gap-4">
-                <input
+              <form
+                onSubmit={handleMagicLink}
+                className="flex flex-col gap-3 md:gap-4"
+              >
+                <FloatingInput
+                  label="Email address"
                   type="email"
-                  placeholder="Email"
-                  className="w-full p-3.5 px-4.5 rounded-lg bg-lpu-maroon/40 border border-white/70 text-white placeholder-white/60 outline-none focus:border-white focus:ring-4 focus:ring-white/10 transition-all"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="h-10 md:h-12 text-sm"
                 />
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-3.5 mt-2 rounded-full bg-white text-lpu-maroon font-black uppercase tracking-widest hover:bg-lpu-gold hover:text-lpu-maroon hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_4px_15px_rgba(0,0,0,0.2)]"
-                >
-                  {isLoading ? "Logging in..." : "Login"}
-                </button>
+                <PrimaryButton
+                  label="Login"
+                  loadingLabel="Logging In..."
+                  isLoading={isLoading}
+                  className="w-full h-10 md:h-12 text-sm uppercase"
+                />
               </form>
             )}
 
             {mode === "magic" && emailSent && (
-              <div className="flex flex-col items-center gap-2.5 text-center py-2">
-                <Mail size={32} className="text-white mb-2" />
-                <p className="text-white font-semibold text-lg">
-                  Check your inbox
-                </p>
-                <p className="text-white/85 text-sm leading-relaxed">
-                  We sent a sign-in link to <br />
-                  <strong className="text-white break-all">{email}</strong>
-                </p>
-                <button
+              <div className="flex flex-col gap-2 md:gap-3 py-2 w-full">
+                <div className="flex flex-col items-center gap-2 md:gap-3 text-center">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-lpu-maroon/10 flex items-center justify-center">
+                    <Mail size={20} className="text-lpu-maroon" />
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-bold text-sm md:text-base">
+                      Check your inbox
+                    </p>
+                    <p className="text-gray-500 text-xs md:text-sm leading-relaxed mt-0.5 md:mt-1">
+                      Sign-in link sent to{" "}
+                      <strong className="text-gray-800 break-all">{email}</strong>
+                    </p>
+                  </div>
+                </div>
+                <PrimaryButton
+                  label="Use a different email"
                   type="button"
-                  className="w-full py-3.5 mt-2 rounded-full bg-white text-lpu-maroon font-black uppercase tracking-widest hover:bg-lpu-gold hover:text-lpu-maroon hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_4px_15px_rgba(0,0,0,0.2)]"
+                  className="w-full h-10 md:h-12 text-sm uppercase mt-2"
                   onClick={() => {
                     setEmailSent(false);
                     setEmail("");
                   }}
-                >
-                  Use a different email
-                </button>
+                />
               </div>
             )}
 
             {mode === "admin" && (
-              <form onSubmit={handleAdminLogin} className="flex flex-col gap-4">
-                <input
+              <form
+                onSubmit={handleAdminLogin}
+                className="flex flex-col gap-3 md:gap-4"
+              >
+                <FloatingInput
+                  label="Email address"
                   type="email"
-                  placeholder="Email"
-                  className="w-full p-3.5 px-4.5 rounded-lg bg-lpu-maroon/40 border border-white/70 text-white placeholder-white/60 outline-none focus:border-white focus:ring-4 focus:ring-white/10 transition-all"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="h-10 md:h-12 text-sm"
                 />
-                <div className="relative w-full">
-                  <input
+                <div className="relative">
+                  <FloatingInput
+                    label="Password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    className="w-full p-3.5 pr-12 rounded-lg bg-lpu-maroon/40 border border-white/70 text-white placeholder-white/60 outline-none focus:border-white focus:ring-4 focus:ring-white/10 transition-all"
+                    className="pr-10 h-10 md:h-12 text-sm"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                   <button
                     type="button"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-lpu-maroon transition-colors cursor-pointer"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-3.5 mt-2 rounded-full bg-white text-lpu-maroon font-black uppercase tracking-widest hover:bg-lpu-gold hover:text-lpu-maroon hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_4px_15px_rgba(0,0,0,0.2)]"
-                >
-                  {isLoading ? "Logging in..." : "Login"}
-                </button>
+                <PrimaryButton
+                  label="Login"
+                  loadingLabel="Logging in..."
+                  isLoading={isLoading}
+                  className="w-full h-10 md:h-12 text-sm uppercase"
+                />
               </form>
             )}
           </div>

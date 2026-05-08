@@ -235,7 +235,7 @@ function SubmitTicket() {
             name="summary"
             value={formData.summary}
             onChange={handleChange}
-            heightClass="h-[50px]"
+            heightClass="h-[7vh] min-h-[44px] max-h-[60px]"
           />
 
           <FloatingTextarea
@@ -243,7 +243,8 @@ function SubmitTicket() {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            heightClass="h-[120px] md:h-[clamp(80px,15vh,180px)]"
+            heightClass="h-[35vh] md:h-[clamp(200px,40vh,500px)]"
+            className="w-full"
           />
 
           <FloatingSelect

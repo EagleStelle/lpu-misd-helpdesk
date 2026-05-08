@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { ChevronDown, Paperclip, X } from "lucide-react";
 
 // PrimaryButton: Main action button, typically for form submission
-export const PrimaryButton = ({ label, isLoading, icon: Icon, className = "", ...props }) => (
+export const PrimaryButton = ({ label, loadingLabel = "Submitting...", isLoading, icon: Icon, className = "", ...props }) => (
   <button
     type="submit"
     disabled={isLoading}
@@ -10,7 +10,7 @@ export const PrimaryButton = ({ label, isLoading, icon: Icon, className = "", ..
     {...props}
   >
     {!isLoading && Icon && <Icon size={18} className="stroke-[2.2px]" />}
-    {isLoading ? "Submitting..." : label}
+    {isLoading ? loadingLabel : label}
   </button>
 );
 
@@ -176,7 +176,7 @@ export const FloatingTextarea = ({
   name,
   value,
   onChange,
-  heightClass = "h-[50px]",
+  heightClass = "h-[clamp(300px,55vh,800px)]",
   required = true,
 }) => {
   const textareaClass = `w-full box-border rounded-xl border border-gray-200 dark:border-zinc-700 text-[0.95rem] bg-white dark:bg-zinc-900 dark:text-zinc-100 outline-none transition-all duration-200 focus:ring-2 focus:ring-lpu-gold focus:border-lpu-gold px-[14px] py-[12px] peer resize-none ${heightClass}`;
