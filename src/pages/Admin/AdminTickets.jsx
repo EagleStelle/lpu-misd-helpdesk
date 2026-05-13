@@ -373,6 +373,24 @@ export default function AdminTickets() {
     }
   }, [isAdmin, showLoading, hideLoading]);
 
+  const patchAssignees = useCallback(async (ticket, payload) => {
+    const token = localStorage.getItem("authToken");
+    const res = await fetch(
+      `${getApiBaseUrl()}/api/tickets/${ticket.id}/assignees`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+    const json = await res.json().catch(() => ({}));
+    if (!json.success) throw new Error(json.message || "Failed to update assignees");
+    return json.data;
+  }, []);
+
   const handleAddAssignee = useCallback(async (ticket, adminId) => {
     const slots = ["Assignee1", "Assignee2", "Assignee3"];
     const emptySlot = slots.find((s) => !ticket[s]);
@@ -384,21 +402,14 @@ export default function AdminTickets() {
     };
     payload[emptySlot] = adminId;
     try {
-      const { error } = await realtimeSupabase
-        .from("Tickets")
-        .update(payload)
-        .eq("id", ticket.id);
-      if (error) {
-        alert(error.message || "Failed to update assignees");
-        return;
-      }
+      const updated = await patchAssignees(ticket, payload);
       setTickets((prev) =>
-        prev.map((t) => (t.id === ticket.id ? { ...t, ...payload } : t)),
+        prev.map((t) => (t.id === ticket.id ? { ...t, ...(updated || payload) } : t)),
       );
     } catch (e) {
-      console.error("Unexpected error:", e);
+      alert(e.message);
     }
-  }, []);
+  }, [patchAssignees]);
 
   const handleRemoveAssignee = useCallback(async (ticket, adminId) => {
     const slots = ["Assignee1", "Assignee2", "Assignee3"];
@@ -411,21 +422,14 @@ export default function AdminTickets() {
     };
     payload[slot] = null;
     try {
-      const { error } = await realtimeSupabase
-        .from("Tickets")
-        .update(payload)
-        .eq("id", ticket.id);
-      if (error) {
-        alert(error.message || "Failed to update assignees");
-        return;
-      }
+      const updated = await patchAssignees(ticket, payload);
       setTickets((prev) =>
-        prev.map((t) => (t.id === ticket.id ? { ...t, ...payload } : t)),
+        prev.map((t) => (t.id === ticket.id ? { ...t, ...(updated || payload) } : t)),
       );
     } catch (e) {
-      console.error("Unexpected error:", e);
+      alert(e.message);
     }
-  }, []);
+  }, [patchAssignees]);
 
   const handlePriorityChange = useCallback(async (ticket, value) => {
     if (!isAdmin || !ticket) return;

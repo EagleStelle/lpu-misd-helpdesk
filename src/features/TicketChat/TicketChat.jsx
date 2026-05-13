@@ -638,15 +638,22 @@ export default function TicketChat({ adminView = false } = {}) {
               Assignee3: ticket.Assignee3 || null,
             };
             assignPayload[emptySlot] = senderId;
-            const { data: ticketData, error: assignErr } =
-              await realtimeSupabase
-                .from("Tickets")
-                .update(assignPayload)
-                .eq("id", ticket.id)
-                .select();
-            if (!assignErr && ticketData?.[0]) {
-              setTicket(ticketData[0]);
-              cacheTicket(id, ticketData[0]);
+            const token = localStorage.getItem("authToken");
+            const assignRes = await fetch(
+              `${getApiBaseUrl()}/api/tickets/${ticket.id}/assignees`,
+              {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(assignPayload),
+              },
+            ).catch(() => null);
+            const assignJson = await assignRes?.json().catch(() => ({}));
+            if (assignJson?.success && assignJson.data) {
+              setTicket(assignJson.data);
+              cacheTicket(id, assignJson.data);
             }
           }
         }

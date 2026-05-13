@@ -534,14 +534,17 @@ router.get("/activity", adminMiddleware, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 0;
         const type = req.query.type || null;
+        const search = req.query.search?.trim() || null;
+        const dateFrom = req.query.dateFrom || null;
+        const dateTo = req.query.dateTo || null;
+        const fetchAll = req.query.all === "true";
         const callerId = req.user?.id || req.user?.sub;
         const isGlobal = Number(req.user?.admin_level) === 0;
 
         let query = supabase
             .from("activity_logs")
             .select("*", { count: "exact" })
-            .order("created_at", { ascending: false })
-            .range(page * ACTIVITY_PAGE_SIZE, (page + 1) * ACTIVITY_PAGE_SIZE - 1);
+            .order("created_at", { ascending: false });
 
         if (!isGlobal) {
             query = query.eq("admin_id", callerId);
@@ -553,6 +556,37 @@ router.get("/activity", adminMiddleware, async (req, res) => {
             query = query.like("action_type", "KNOWLEDGE_%");
         } else if (type === "admin") {
             query = query.like("action_type", "ADMIN_%");
+        }
+
+        if (dateFrom) {
+            query = query.gte("created_at", `${dateFrom}T00:00:00.000Z`);
+        }
+        if (dateTo) {
+            query = query.lte("created_at", `${dateTo}T23:59:59.999Z`);
+        }
+
+        if (search) {
+            const orConditions = [
+                `target_label.ilike.%${search}%`,
+                `action_type.ilike.%${search}%`,
+            ];
+
+            if (isGlobal) {
+                const { data: matchingAdmins } = await supabase
+                    .from("admin_users")
+                    .select("id")
+                    .or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+                const matchingIds = (matchingAdmins || []).map((a) => a.id);
+                if (matchingIds.length > 0) {
+                    orConditions.push(`admin_id.in.(${matchingIds.join(",")})`);
+                }
+            }
+
+            query = query.or(orConditions.join(","));
+        }
+
+        if (!fetchAll) {
+            query = query.range(page * ACTIVITY_PAGE_SIZE, (page + 1) * ACTIVITY_PAGE_SIZE - 1);
         }
 
         const { data, error, count } = await query;

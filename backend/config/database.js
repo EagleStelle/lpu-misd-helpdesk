@@ -441,22 +441,6 @@ export const initializeAdminUsers = async () => {
       .limit(1);
 
     if (isMissingTableError(tableCheckError)) {
-      await sql(`
-        CREATE TABLE IF NOT EXISTS admin_users (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          email VARCHAR(255) NOT NULL UNIQUE,
-          password_hash VARCHAR(255) NOT NULL,
-          full_name VARCHAR(255),
-          is_active BOOLEAN DEFAULT true,
-          admin_level INTEGER NOT NULL DEFAULT 1 CHECK (admin_level IN (0, 1)),
-          supabase_auth_id UUID,
-          email_verified_at TIMESTAMPTZ,
-          created_at TIMESTAMPTZ DEFAULT NOW(),
-          updated_at TIMESTAMPTZ DEFAULT NOW()
-        );
-        CREATE INDEX IF NOT EXISTS idx_admin_users_email ON admin_users(email);
-        ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
-      `);
       await reloadSchemaCache();
     } else if (tableCheckError) {
       console.error("[Admin init] Table check error:", tableCheckError.message);

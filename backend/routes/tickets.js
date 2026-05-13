@@ -401,13 +401,28 @@ router.patch("/:id/assignees", adminMiddleware, async (req, res) => {
 
     const adminId = req.user.id || req.user.sub;
     const newAssignees = [Assignee1, Assignee2, Assignee3].filter(Boolean);
+
+    let assigneeNames = [];
+    if (newAssignees.length > 0) {
+      const { data: adminRows } = await supabase
+        .from("admin_users")
+        .select("id, full_name, email")
+        .in("id", newAssignees);
+      const nameMap = Object.fromEntries(
+        (adminRows || []).map((a) => [a.id, (a.full_name || a.email || "").trim()])
+      );
+      assigneeNames = newAssignees.map((aid) => nameMap[aid] || aid);
+    }
+
     logActivity({
       adminId,
       actionType: "TICKET_ASSIGNED",
       targetType: "ticket",
       targetId: ticketId,
-      targetLabel: `#${ticketId}`,
-      metadata: { assignees: newAssignees },
+      targetLabel: assigneeNames.length
+        ? `#${ticketId} → ${assigneeNames.join(", ")}`
+        : `#${ticketId}`,
+      metadata: { assignees: newAssignees, assigneeNames },
     });
 
     return res.json({ success: true, data: data[0] });

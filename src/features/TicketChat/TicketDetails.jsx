@@ -12,7 +12,7 @@ export default function TicketDetails({
   isTicketClosed,
   formatDateTime,
 }) {
-  const statusText = ticket?.status || ticket?.Status || "Open";
+  const statusText = ticket?.status || "Open";
   const now = useMemo(() => Date.now(), []);
 
   const calcRemaining = (dueAtValue) => {
