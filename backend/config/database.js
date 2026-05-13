@@ -108,7 +108,14 @@ export const initializeDatabase = async () => {
         closed_at TIMESTAMPTZ
       );
       ALTER TABLE "Tickets" ENABLE ROW LEVEL SECURITY;
-      ALTER PUBLICATION supabase_realtime ADD TABLE "Tickets";
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_publication_tables
+          WHERE pubname = 'supabase_realtime' AND tablename = 'Tickets'
+        ) THEN
+          ALTER PUBLICATION supabase_realtime ADD TABLE "Tickets";
+        END IF;
+      END $$;
     `);
     console.log("✓ Tickets");
 
@@ -129,7 +136,14 @@ export const initializeDatabase = async () => {
       CREATE INDEX IF NOT EXISTS idx_ticket_messages_ticket_id
         ON ticket_messages(ticket_id, created_at);
       ALTER TABLE ticket_messages ENABLE ROW LEVEL SECURITY;
-      ALTER PUBLICATION supabase_realtime ADD TABLE ticket_messages;
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_publication_tables
+          WHERE pubname = 'supabase_realtime' AND tablename = 'ticket_messages'
+        ) THEN
+          ALTER PUBLICATION supabase_realtime ADD TABLE ticket_messages;
+        END IF;
+      END $$;
     `);
     console.log("✓ ticket_messages");
 
@@ -153,7 +167,14 @@ export const initializeDatabase = async () => {
       CREATE INDEX IF NOT EXISTS idx_ticket_sla_history_ticket_id
         ON ticket_sla_history(ticket_id, closed_at DESC);
       ALTER TABLE ticket_sla_history ENABLE ROW LEVEL SECURITY;
-      ALTER PUBLICATION supabase_realtime ADD TABLE ticket_sla_history;
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_publication_tables
+          WHERE pubname = 'supabase_realtime' AND tablename = 'ticket_sla_history'
+        ) THEN
+          ALTER PUBLICATION supabase_realtime ADD TABLE ticket_sla_history;
+        END IF;
+      END $$;
     `);
     console.log("✓ ticket_sla_history");
 

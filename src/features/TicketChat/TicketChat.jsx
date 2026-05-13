@@ -30,6 +30,7 @@ export default function TicketChat({ adminView = false } = {}) {
   const [expandedSummary, setExpandedSummary] = useState(false);
   const [expandedTimeline, setExpandedTimeline] = useState(false);
   const [timelineHistory, setTimelineHistory] = useState([]);
+  const [timelineVersion, setTimelineVersion] = useState(0);
   const scrollRef = useRef(null);
   const isAtBottomRef = useRef(true);
   const userIdRef = useRef(null);
@@ -127,6 +128,7 @@ export default function TicketChat({ adminView = false } = {}) {
       const updated = json.data || { ...ticket, ...payload };
       setTicket(updated);
       cacheTicket(id, updated);
+      setTimelineVersion((v) => v + 1);
     } catch (err) {
       console.error("Unexpected error updating ticket:", err);
       alert("Unexpected error updating ticket status");
@@ -232,7 +234,7 @@ export default function TicketChat({ adminView = false } = {}) {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "ticket_sla_history",
           filter: `ticket_id=eq.${ticketId}`,
@@ -250,7 +252,7 @@ export default function TicketChat({ adminView = false } = {}) {
       isCancelled = true;
       realtimeSupabase.removeChannel(channel);
     };
-  }, [id, ticket?.closed_at]);
+  }, [id, ticket?.closed_at, timelineVersion]);
 
   useEffect(() => {
     if (!ticket?.created_by) return;
