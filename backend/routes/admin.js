@@ -507,12 +507,13 @@ router.patch("/admins/:adminId", globalAdminMiddleware, async (req, res) => {
             });
         }
         if (req.body.adminLevel !== undefined) {
+            const levelName = updates.admin_level === 0 ? "Global Admin" : "Ticket Admin";
             logActivity({
                 adminId: callerId,
                 actionType: "ADMIN_LEVEL_CHANGED",
                 targetType: "admin",
                 targetId: adminId,
-                targetLabel: updated.full_name || updated.email,
+                targetLabel: `${updated.full_name || updated.email}, set to ${levelName}`,
                 metadata: { email: updated.email, new_level: updates.admin_level },
             });
         }

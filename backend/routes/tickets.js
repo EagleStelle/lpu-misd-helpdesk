@@ -420,8 +420,8 @@ router.patch("/:id/assignees", adminMiddleware, async (req, res) => {
       targetType: "ticket",
       targetId: ticketId,
       targetLabel: assigneeNames.length
-        ? `#${ticketId} → ${assigneeNames.join(", ")}`
-        : `#${ticketId}`,
+        ? `Ticket #${ticketId} assigned to ${assigneeNames.join(", ")}`
+        : `Ticket #${ticketId}`,
       metadata: { assignees: newAssignees, assigneeNames },
     });
 

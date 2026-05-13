@@ -206,8 +206,17 @@ export default function AdminActivity() {
 
     cols.push({
       label: "Target",
-      accessor: (row) => row.target_label || row.target_id || "—",
-      variant: "subtitle",
+      render: (row) => {
+        const text = row.target_label || row.target_id || "—";
+        return (
+          <span
+            className="block max-w-xs truncate text-sm text-gray-600 dark:text-zinc-400"
+            title={text}
+          >
+            {text}
+          </span>
+        );
+      },
     });
 
     return cols;
