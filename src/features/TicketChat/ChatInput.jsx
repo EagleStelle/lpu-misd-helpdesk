@@ -134,7 +134,7 @@ export default function ChatInput({
           onClick={onSend}
           disabled={disabled}
           aria-label="send message"
-          className="flex items-center justify-center w-8 h-8 bg-lpu-maroon text-white rounded-xl hover:bg-lpu-gold hover:text-lpu-maroon active:scale-95 transition-all shrink-0 disabled:opacity-40 shadow-sm"
+          className="flex items-center justify-center w-8 h-8 bg-lpu-maroon text-white rounded-xl hover:bg-lpu-gold hover:text-lpu-maroon dark:hover:bg-lpu-gold dark:hover:text-lpu-maroon active:scale-95 transition-all shrink-0 disabled:opacity-40 shadow-sm cursor-pointer"
         >
           <Send size={16} strokeWidth={2} />
         </button>

@@ -117,6 +117,9 @@ export default function ChatMessages({
         ? "You"
         : getDisplayName(m.senderName, m.senderEmail, m.senderRole, m.senderId);
 
+    const hasText = !!content?.trim();
+    const hasAttachments = !isTranscript && m.attachments?.length > 0;
+
     return (
       <div
         key={itemKey}
@@ -125,34 +128,35 @@ export default function ChatMessages({
         <div
           className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${alignRight ? "items-end" : "items-start"}`}
         >
-          <div className="flex items-center gap-2 mb-1 px-1">
-            <span
-              className={`text-[11px] font-black tracking-tight ${labelColor}`}
-            >
-              {displayName}
-            </span>
-            <span className="text-[10px] text-gray-400 font-medium">
-              {formatTimeAgo(m.time)}
-            </span>
-          </div>
+          {hasText && (
+            <>
+              <div className="flex items-center gap-2 mb-1 px-1">
+                <span
+                  className={`text-[11px] font-black tracking-tight ${labelColor}`}
+                >
+                  {displayName}
+                </span>
+                <span className="text-[10px] text-gray-400 font-medium">
+                  {formatTimeAgo(m.time)}
+                </span>
+              </div>
 
-          {/* high-intensity bottom-right shadow on both sides */}
-          {content?.trim() && (
-            <div
-              className={`px-4 py-3 rounded-2xl text-sm leading-relaxed border shadow-[12px_12px_24px_rgba(0,0,0,0.18)] ${bubbleClass} ${alignRight ? "rounded-tr-none" : "rounded-tl-none"}`}
-            >
-              <p className="whitespace-pre-wrap wrap-break-word">{content}</p>
-            </div>
+              <div
+                className={`px-4 py-3 rounded-2xl text-sm leading-relaxed border shadow-[12px_12px_24px_rgba(0,0,0,0.18)] ${bubbleClass} ${alignRight ? "rounded-tr-none" : "rounded-tl-none"}`}
+              >
+                <p className="whitespace-pre-wrap wrap-break-word">{content}</p>
+              </div>
+            </>
           )}
 
-          {!isTranscript && m.attachments?.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
+          {hasAttachments && (
+            <div className={`flex flex-wrap gap-2 ${hasText ? "mt-3" : ""}`}>
               {m.attachments.map((file, idx) =>
                 isImageFile(file.name) ? (
                   <button
                     key={idx}
                     onClick={() => onOpenAttachment(file)}
-                    className="h-20 w-32 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 shadow-[8px_8px_16px_rgba(0,0,0,0.12)] hover:border-lpu-maroon dark:hover:border-lpu-gold transition-all"
+                    className="h-20 w-32 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 shadow-[8px_8px_16px_rgba(0,0,0,0.12)] hover:border-lpu-maroon dark:hover:border-lpu-gold transition-all cursor-pointer"
                   >
                     <img
                       src={getAttachmentSrc(file)}
@@ -164,7 +168,7 @@ export default function ChatMessages({
                   <button
                     key={idx}
                     onClick={() => onDownloadAttachment(file)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 hover:border-lpu-maroon dark:hover:border-lpu-gold hover:bg-gray-100 dark:hover:bg-zinc-700 shadow-[8px_8px_16px_rgba(0,0,0,0.08)] transition-all text-left"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 hover:bg-lpu-gold hover:border-lpu-gold hover:text-lpu-maroon dark:hover:bg-lpu-gold dark:hover:border-lpu-gold dark:hover:text-lpu-maroon shadow-[8px_8px_16px_rgba(0,0,0,0.08)] transition-all text-left cursor-pointer"
                   >
                     <FileText size={16} className="text-gray-400 dark:text-zinc-500 shrink-0" />
                     <span className="text-xs text-gray-700 dark:text-zinc-300 max-w-28 truncate">
@@ -224,7 +228,7 @@ export default function ChatMessages({
                 <button
                   key={idx}
                   onClick={() => onOpenAttachment(file)}
-                  className="h-20 w-32 rounded-lg overflow-hidden border border-gray-200 shadow-[8px_8px_16px_rgba(0,0,0,0.12)] hover:border-lpu-maroon transition-all"
+                  className="h-20 w-32 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 shadow-[8px_8px_16px_rgba(0,0,0,0.12)] hover:border-lpu-maroon dark:hover:border-lpu-gold transition-all cursor-pointer"
                 >
                   <img
                     src={getAttachmentSrc(file)}
@@ -236,7 +240,7 @@ export default function ChatMessages({
                 <button
                   key={idx}
                   onClick={() => onDownloadAttachment(file)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 hover:border-lpu-maroon hover:bg-gray-100 shadow-[8px_8px_16px_rgba(0,0,0,0.08)] transition-all text-left"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 hover:bg-lpu-gold hover:border-lpu-gold hover:text-lpu-maroon dark:hover:bg-lpu-gold dark:hover:border-lpu-gold dark:hover:text-lpu-maroon shadow-[8px_8px_16px_rgba(0,0,0,0.08)] transition-all text-left cursor-pointer"
                 >
                   <FileText size={16} className="text-gray-400 shrink-0" />
                   <span className="text-xs text-gray-700 max-w-28 truncate">

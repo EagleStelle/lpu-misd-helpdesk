@@ -833,7 +833,7 @@ export default function TicketChat({ adminView = false } = {}) {
 
   return (
     <div className="flex flex-col w-full h-full max-h-full overflow-hidden bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
-      <div className="flex flex-col flex-1 min-h-0 w-full max-w-5xl mx-auto bg-white dark:bg-zinc-900 sm:my-2 sm:rounded-2xl border-t-[6px] border-t-lpu-maroon overflow-hidden shadow-md dark:shadow-2xl dark:border-zinc-800 transition-colors duration-300">
+      <div className="flex flex-col flex-1 min-h-0 w-full max-w-5xl mx-auto bg-white dark:bg-zinc-900 sm:my-2 sm:rounded-2xl border-t-[6px] border-t-lpu-maroon dark:border-t-lpu-gold overflow-hidden shadow-md dark:shadow-2xl dark:border-zinc-800 transition-colors duration-300">
         <ChatHeader
           adminView={adminView}
           creatorName={creatorName}
