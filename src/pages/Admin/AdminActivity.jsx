@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { Download, Calendar } from "lucide-react";
+import { Download } from "lucide-react";
 import { getApiBaseUrl } from "../../utils/apiBaseUrl";
 import { FilterSelect, SearchInput } from "../../components/Controls";
+import { DateRangeFilter } from "../../components/DateRangeFilter";
 import { DataTable } from "../../components/DataTable";
 import {
   useNavbarActions,
@@ -95,30 +96,6 @@ export default function AdminActivity() {
   const handleSearch = (val) => {
     setSearch(val);
     setPage(0);
-  };
-
-  const handleDateFrom = (e) => {
-    setDateFrom(e.target.value);
-    setPage(0);
-  };
-
-  const handleDateTo = (e) => {
-    setDateTo(e.target.value);
-    setPage(0);
-  };
-
-  const handleDatePillClick = (e) => {
-    const input = e.currentTarget.querySelector('input[type="date"]');
-    if (!input) return;
-    if (typeof input.showPicker === "function") { input.showPicker(); input.focus(); return; }
-    input.focus();
-  };
-
-  const formatFilterDate = (ymd) => {
-    if (!ymd) return "";
-    const [y, m, d] = ymd.split("-");
-    if (!y || !m || !d) return "";
-    return `${m}/${d}/${y.slice(-2)}`;
   };
 
   const onExportCsv = async () => {
@@ -232,32 +209,13 @@ export default function AdminActivity() {
             options={FILTER_OPTIONS}
           />
         </div>
-        <div className="w-full md:w-1/4 flex gap-2">
-          <div
-            className="relative group flex-1 cursor-pointer select-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg px-3 h-10 flex items-center justify-between gap-2 text-sm font-medium text-gray-700 dark:text-zinc-300 transition-all hover:border-lpu-maroon dark:hover:border-white/20 focus-within:ring-2 focus-within:ring-lpu-gold focus-within:border-lpu-gold"
-            role="button" tabIndex={0}
-            onClick={handleDatePillClick}
-            onKeyDown={(e) => e.key === "Enter" && handleDatePillClick({ currentTarget: e.currentTarget })}
-          >
-            <span className="relative z-10 pointer-events-none truncate text-xs">
-              {dateFrom ? `From ${formatFilterDate(dateFrom)}` : "From"}
-            </span>
-            <Calendar className="w-3.5 h-3.5 shrink-0 text-gray-400 group-hover:text-lpu-maroon transition-colors" />
-            <input type="date" className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full" value={dateFrom} onChange={handleDateFrom} />
-          </div>
-          <div
-            className="relative group flex-1 cursor-pointer select-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg px-3 h-10 flex items-center justify-between gap-2 text-sm font-medium text-gray-700 dark:text-zinc-300 transition-all hover:border-lpu-maroon dark:hover:border-white/20 focus-within:ring-2 focus-within:ring-lpu-gold focus-within:border-lpu-gold"
-            role="button" tabIndex={0}
-            onClick={handleDatePillClick}
-            onKeyDown={(e) => e.key === "Enter" && handleDatePillClick({ currentTarget: e.currentTarget })}
-          >
-            <span className="relative z-10 pointer-events-none truncate text-xs">
-              {dateTo ? `To ${formatFilterDate(dateTo)}` : "To"}
-            </span>
-            <Calendar className="w-3.5 h-3.5 shrink-0 text-gray-400 group-hover:text-lpu-maroon transition-colors" />
-            <input type="date" className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full" value={dateTo} onChange={handleDateTo} />
-          </div>
-        </div>
+        <DateRangeFilter
+          onChange={(f, t) => {
+            setDateFrom(f);
+            setDateTo(t);
+            setPage(0);
+          }}
+        />
         <div className="w-full md:w-1/2">
           <SearchInput
             placeholder="Search admin, action, or target..."

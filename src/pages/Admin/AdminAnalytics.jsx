@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { Navigate } from "react-router-dom";
 import {
   Download,
-  Calendar,
   Users,
   Target,
   Building2,
@@ -16,6 +15,7 @@ import {
   UserSquare2,
   X,
 } from "lucide-react";
+import { DateRangeFilter } from "../../components/DateRangeFilter";
 import { jwtDecode } from "jwt-decode";
 import { getApiBaseUrl } from "../../utils/apiBaseUrl";
 import { realtimeSupabase } from "../../lib/realtimeSupabaseClient";
@@ -358,12 +358,13 @@ function MultiRingDonutChart({
             key={key}
             type="button"
             onClick={() => onStatusClick?.(key)}
-            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-left transition-all duration-150 border w-full ${anySelected && !selectedStatuses.has(key)
-              ? "opacity-40 border-transparent"
-              : selectedStatuses.has(key)
-                ? "border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800 shadow-sm"
-                : "border-transparent hover:border-gray-100 dark:hover:border-white/5 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
-              }`}
+            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-left transition-all duration-150 border w-full ${
+              anySelected && !selectedStatuses.has(key)
+                ? "opacity-40 border-transparent"
+                : selectedStatuses.has(key)
+                  ? "border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800 shadow-sm"
+                  : "border-transparent hover:border-gray-100 dark:hover:border-white/5 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+            }`}
           >
             <span
               className="w-2 h-2 rounded-full shrink-0"
@@ -442,19 +443,21 @@ function VerticalBarGraph({
               </div>
 
               <div
-                className={`flex-1 min-h-0 w-full flex transition-all duration-150 ${isSelected
-                  ? "outline-2 outline-lpu-maroon outline-offset-2 rounded-lg"
-                  : !isEmpty && onBarClick
-                    ? "group-hover:scale-[1.03]"
-                    : ""
-                  }`}
+                className={`flex-1 min-h-0 w-full flex transition-all duration-150 ${
+                  isSelected
+                    ? "outline-2 outline-lpu-maroon outline-offset-2 rounded-lg"
+                    : !isEmpty && onBarClick
+                      ? "group-hover:scale-[1.03]"
+                      : ""
+                }`}
               >
                 {/* Left bar: satisfied / unsatisfied */}
                 <div
-                  className={`flex-1 h-full flex flex-col-reverse rounded-l-lg overflow-hidden relative transition-all duration-150 ${isEmpty
-                    ? "bg-gray-50 dark:bg-zinc-800/30 border border-dashed border-gray-200 dark:border-white/8"
-                    : "bg-gray-100 dark:bg-zinc-800/60"
-                    }`}
+                  className={`flex-1 h-full flex flex-col-reverse rounded-l-lg overflow-hidden relative transition-all duration-150 ${
+                    isEmpty
+                      ? "bg-gray-50 dark:bg-zinc-800/30 border border-dashed border-gray-200 dark:border-white/8"
+                      : "bg-gray-100 dark:bg-zinc-800/60"
+                  }`}
                 >
                   {!isEmpty && (
                     <>
@@ -472,10 +475,11 @@ function VerticalBarGraph({
 
                 {/* Right bar: closed / open */}
                 <div
-                  className={`flex-1 h-full flex flex-col-reverse rounded-r-lg overflow-hidden relative transition-all duration-150 ${isEmpty
-                    ? "bg-gray-50 dark:bg-zinc-800/30 border border-dashed border-gray-200 dark:border-white/8"
-                    : "bg-gray-100 dark:bg-zinc-800/60"
-                    }`}
+                  className={`flex-1 h-full flex flex-col-reverse rounded-r-lg overflow-hidden relative transition-all duration-150 ${
+                    isEmpty
+                      ? "bg-gray-50 dark:bg-zinc-800/30 border border-dashed border-gray-200 dark:border-white/8"
+                      : "bg-gray-100 dark:bg-zinc-800/60"
+                  }`}
                 >
                   {!isEmpty && (
                     <>
@@ -574,8 +578,9 @@ function StackedDistributionBar({
                   onSegmentClick?.(item.label);
                 }
               }}
-              className={`h-full flex items-center justify-center text-white text-[10px] font-bold cursor-pointer outline-none transition-all duration-150 border-r border-white/15 last:border-0 ${isSelected ? "brightness-110" : "hover:brightness-110"
-                }`}
+              className={`h-full flex items-center justify-center text-white text-[10px] font-bold cursor-pointer outline-none transition-all duration-150 border-r border-white/15 last:border-0 ${
+                isSelected ? "brightness-110" : "hover:brightness-110"
+              }`}
               style={{ width: `${percentage}%`, backgroundColor: color }}
             >
               {percentage > 8 && (
@@ -594,10 +599,11 @@ function StackedDistributionBar({
               key={item.label}
               type="button"
               onClick={() => onSegmentClick?.(item.label)}
-              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-2 py-1 text-[10px] font-medium cursor-pointer transition-all duration-150 ${isSelected
-                ? "bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-lpu-maroon/40 text-gray-800 dark:text-zinc-200"
-                : "text-gray-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-900/60 hover:text-gray-700 dark:hover:text-zinc-300"
-                }`}
+              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-2 py-1 text-[10px] font-medium cursor-pointer transition-all duration-150 ${
+                isSelected
+                  ? "bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-lpu-maroon/40 text-gray-800 dark:text-zinc-200"
+                  : "text-gray-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-900/60 hover:text-gray-700 dark:hover:text-zinc-300"
+              }`}
             >
               <span
                 className="w-1.5 h-1.5 rounded-full shrink-0"
@@ -687,12 +693,13 @@ function SlaSection({
                       onAdminClick?.(adminEntry.adminId);
                     }
                   }}
-                  className={`rounded-xl p-3 transition-all duration-150 border ${isSelected
-                    ? "ring-2 ring-lpu-maroon ring-offset-1 bg-lpu-maroon/5 border-lpu-maroon/20"
-                    : isCurrentUser
-                      ? "bg-lpu-maroon/4 border-lpu-maroon/15"
-                      : "bg-gray-50 dark:bg-zinc-800/40 border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/10"
-                    } ${isGlobalAdminUser ? "cursor-pointer" : ""}`}
+                  className={`rounded-xl p-3 transition-all duration-150 border ${
+                    isSelected
+                      ? "ring-2 ring-lpu-maroon ring-offset-1 bg-lpu-maroon/5 border-lpu-maroon/20"
+                      : isCurrentUser
+                        ? "bg-lpu-maroon/4 border-lpu-maroon/15"
+                        : "bg-gray-50 dark:bg-zinc-800/40 border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/10"
+                  } ${isGlobalAdminUser ? "cursor-pointer" : ""}`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <Users
@@ -1087,26 +1094,6 @@ export default function AdminAnalytics() {
     adminUsers,
   ]);
 
-  const formatFilterDate = (ymd) => {
-    if (!ymd) return "";
-    const [y, m, d] = ymd.split("-");
-    if (!y || !m || !d) return "";
-    return `${m}/${d}/${y.slice(-2)}`;
-  };
-
-  const handleDatePillClick = (e) => {
-    const pill = e.currentTarget;
-    const input = pill.querySelector('input[type="date"]');
-    if (!input) return;
-    if (typeof input.showPicker === "function") {
-      input.showPicker();
-      input.focus();
-      return;
-    }
-    input.focus();
-    input.click();
-  };
-
   const handleDeptBarClick = useCallback(
     (v) => makeToggleHandler(setSelectedDepts, "dept", selectedDepts)(v),
     [makeToggleHandler, selectedDepts],
@@ -1317,13 +1304,13 @@ export default function AdminAnalytics() {
   if (!isAdmin) return <Navigate to="/Tickets" replace />;
 
   return (
-    <section className="w-full max-w-330 mx-auto px-3 sm:px-6 h-auto md:h-[calc(100dvh-3rem)] overflow-y-auto md:overflow-hidden flex flex-col py-3 pb-4 font-(--font-poppins)">
+    <section className="w-full max-w-330 mx-auto px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
       {error ? (
         <div className="mt-4 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-900">
           {error}
         </div>
       ) : (
-        <div className="flex flex-col gap-2 md:flex-1 md:min-h-0">
+        <div className="flex flex-col gap-4 md:flex-1 md:min-h-0">
           {/* ── Toolbar ── */}
           <div className="flex flex-wrap items-center justify-between gap-2 shrink-0">
             {/* Left: active filter chips */}
@@ -1341,53 +1328,13 @@ export default function AdminAnalytics() {
               ))}
             </div>
 
-            {/* Right: date filters */}
-            <div className="flex gap-2 items-center flex-wrap">
-              <div
-                className="relative group cursor-pointer select-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/8 rounded-xl px-4 h-9 flex items-center gap-2.5 sm:min-w-37 text-[13px] font-medium text-gray-600 dark:text-zinc-300 shadow-sm hover:border-lpu-maroon/50 transition-colors duration-150 focus-within:ring-2 focus-within:ring-lpu-maroon/20"
-                role="button"
-                tabIndex={0}
-                onClick={handleDatePillClick}
-                onKeyDown={(e) =>
-                  e.key === "Enter" &&
-                  handleDatePillClick({ currentTarget: e.currentTarget })
-                }
-              >
-                <Calendar className="w-3.5 h-3.5 text-gray-400 dark:text-zinc-500 shrink-0" />
-                <span className="relative z-10 pointer-events-none">
-                  {fromDate
-                    ? `From ${formatFilterDate(fromDate)}`
-                    : "From date"}
-                </span>
-                <input
-                  type="date"
-                  className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                />
-              </div>
-              <div
-                className="relative group cursor-pointer select-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/8 rounded-xl px-4 h-9 flex items-center gap-2.5 sm:min-w-37 text-[13px] font-medium text-gray-600 dark:text-zinc-300 shadow-sm hover:border-lpu-maroon/50 transition-colors duration-150 focus-within:ring-2 focus-within:ring-lpu-maroon/20"
-                role="button"
-                tabIndex={0}
-                onClick={handleDatePillClick}
-                onKeyDown={(e) =>
-                  e.key === "Enter" &&
-                  handleDatePillClick({ currentTarget: e.currentTarget })
-                }
-              >
-                <Calendar className="w-3.5 h-3.5 text-gray-400 dark:text-zinc-500 shrink-0" />
-                <span className="relative z-10 pointer-events-none">
-                  {toDate ? `To ${formatFilterDate(toDate)}` : "To date"}
-                </span>
-                <input
-                  type="date"
-                  className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                />
-              </div>
-            </div>
+            {/* Right: date range filter */}
+            <DateRangeFilter
+              onChange={(f, t) => {
+                setFromDate(f);
+                setToDate(t);
+              }}
+            />
           </div>
 
           {/* ── 2-column layout ── */}
@@ -1400,8 +1347,12 @@ export default function AdminAnalytics() {
                   <MultiRingDonutChart
                     closedCount={closedCount}
                     openCount={openCount}
-                    satisfiedCount={selectedStatuses.has("open") ? 0 : satisfiedCount}
-                    unsatisfiedCount={selectedStatuses.has("open") ? 0 : unsatisfiedCount}
+                    satisfiedCount={
+                      selectedStatuses.has("open") ? 0 : satisfiedCount
+                    }
+                    unsatisfiedCount={
+                      selectedStatuses.has("open") ? 0 : unsatisfiedCount
+                    }
                     total={closedCount + openCount}
                     selectedStatuses={selectedStatuses}
                     onStatusClick={handleStatusClick}
