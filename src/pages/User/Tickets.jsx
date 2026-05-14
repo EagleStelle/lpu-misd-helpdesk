@@ -95,7 +95,7 @@ function Tickets() {
   const isClosedFilter = filter === "Closed Tickets";
 
   const columns = [
-    { label: "Ticket No.", accessor: "id", variant: "badge" },
+    { label: "ID", accessor: "id", variant: "badge" },
     {
       label: "Status",
       colWidth: "w-32",
@@ -406,7 +406,7 @@ function Tickets() {
             />
 
             <SearchInput
-              placeholder="Search ticket no. or summary..."
+              placeholder="Search tickets..."
               onSearch={handleSearch}
             />
           </div>
