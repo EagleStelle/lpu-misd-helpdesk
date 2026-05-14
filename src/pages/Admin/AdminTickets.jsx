@@ -11,6 +11,7 @@ import {
 } from "../../context/NavbarActionsContext";
 import { FilterSelect, SearchInput } from "../../components/Controls";
 import { DataTable } from "../../components/DataTable";
+import { DateRangeFilter } from "../../components/DateRangeFilter";
 
 const PAGE_SIZE = 10;
 
@@ -160,6 +161,8 @@ export default function AdminTickets() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [realtimeTick, setRealtimeTick] = useState(0);
 
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -232,6 +235,9 @@ export default function AdminTickets() {
           q = q.is("closed_at", null);
         }
 
+        if (dateFrom) q = q.gte("created_at", dateFrom);
+        if (dateTo)   q = q.lte("created_at", dateTo + "T23:59:59");
+
         q = buildSearchFilter(q, search);
 
         const { data, error: supaError, count } = await q;
@@ -251,7 +257,7 @@ export default function AdminTickets() {
     };
 
     fetchTickets();
-  }, [isLoggedIn, isAdmin, page, filter, search, realtimeTick, showLoading, hideLoading]);
+  }, [isLoggedIn, isAdmin, page, filter, search, dateFrom, dateTo, realtimeTick, showLoading, hideLoading]);
 
   // Realtime: refetch on any ticket change
   useEffect(() => {
@@ -300,6 +306,9 @@ export default function AdminTickets() {
       } else {
         q = q.is("closed_at", null);
       }
+
+      if (dateFrom) q = q.gte("created_at", dateFrom);
+      if (dateTo)   q = q.lte("created_at", dateTo + "T23:59:59");
 
       q = buildSearchFilter(q, search);
 
@@ -525,16 +534,27 @@ export default function AdminTickets() {
 
   return (
     <section className="w-full max-w-330 mx-auto px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
-      <div className="flex flex-col md:flex-row gap-4 mb-4">
-        <FilterSelect
-          value={filter}
-          onChange={handleFilter}
-          options={["Open Tickets", "Closed Tickets"]}
+      <div className="flex flex-col md:flex-row gap-3 mb-4">
+        <div className="w-full md:w-1/4">
+          <FilterSelect
+            value={filter}
+            onChange={handleFilter}
+            options={["Open Tickets", "Closed Tickets"]}
+          />
+        </div>
+        <DateRangeFilter
+          onChange={(f, t) => {
+            setDateFrom(f);
+            setDateTo(t);
+            setPage(0);
+          }}
         />
-        <SearchInput
-          placeholder="Search tickets..."
-          onSearch={handleSearch}
-        />
+        <div className="w-full md:w-1/2">
+          <SearchInput
+            placeholder="Search tickets..."
+            onSearch={handleSearch}
+          />
+        </div>
       </div>
 
       {error ? (
