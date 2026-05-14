@@ -80,7 +80,7 @@ export default function ChatHeader({
         <button
           type="button"
           onClick={onTalkToHuman}
-          className="ml-2 bg-lpu-maroon text-white p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold hover:text-lpu-maroon transition-all shadow-lg shadow-lpu-maroon/20 active:scale-95 shrink-0"
+          className="ml-2 bg-lpu-maroon text-white p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold hover:text-lpu-maroon dark:hover:bg-lpu-gold dark:hover:text-lpu-maroon transition-all shadow-lg shadow-lpu-maroon/20 active:scale-95 shrink-0 cursor-pointer"
         >
           <UserRound size={16} />
           <span className="hidden sm:inline font-bold uppercase text-xs tracking-tight">Talk to a human</span>

@@ -122,7 +122,7 @@ export default function TicketDetails({
 
           <button
             onClick={onToggleTimeline}
-            className="bg-white dark:!bg-zinc-800 text-lpu-maroon dark:text-lpu-gold border border-lpu-maroon/30 dark:border-lpu-gold/30 p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold dark:hover:bg-lpu-maroon hover:text-lpu-maroon dark:hover:text-lpu-gold hover:border-lpu-gold dark:hover:border-lpu-maroon transition-all shadow-sm active:scale-95 shrink-0"
+            className="bg-white dark:!bg-zinc-800 text-lpu-maroon dark:text-lpu-gold border border-lpu-maroon/30 dark:border-lpu-gold/30 p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold dark:hover:bg-lpu-gold! dark:hover:text-lpu-maroon dark:hover:border-lpu-gold transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
           >
             <Clock size={16} />
             <span className="hidden sm:inline font-bold uppercase text-xs tracking-tight">
@@ -137,7 +137,7 @@ export default function TicketDetails({
 
           <button
             onClick={onToggleSummary}
-            className="bg-lpu-maroon dark:!bg-lpu-maroon text-white dark:text-white border border-lpu-maroon p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold transition-all shadow-lg shadow-lpu-maroon/20 dark:shadow-none active:scale-95 shrink-0"
+            className="bg-lpu-maroon dark:!bg-lpu-maroon text-white dark:text-white border border-lpu-maroon p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold dark:hover:bg-lpu-gold! dark:hover:text-lpu-maroon dark:hover:border-lpu-gold transition-all shadow-lg shadow-lpu-maroon/20 dark:shadow-none active:scale-95 shrink-0 cursor-pointer"
           >
             <FileText size={16} />
             <span className="hidden sm:inline font-bold uppercase text-xs tracking-tight">
