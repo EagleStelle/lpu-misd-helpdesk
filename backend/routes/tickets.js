@@ -313,7 +313,6 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
       logActivity({
         adminId,
         actionType: status === "Open" ? "TICKET_REOPENED" : "TICKET_CLOSED",
-        targetType: "ticket",
         targetId: ticketId,
         targetLabel: `#${ticketId}`,
       });
@@ -403,6 +402,12 @@ router.patch("/:id/assignees", adminMiddleware, async (req, res) => {
       }
     }
 
+    const { data: oldTicket } = await supabase
+      .from("Tickets")
+      .select("Assignee1, Assignee2, Assignee3")
+      .eq("id", ticketId)
+      .single();
+
     const { data, error } = await supabase
       .from("Tickets")
       .update({
@@ -422,33 +427,27 @@ router.patch("/:id/assignees", adminMiddleware, async (req, res) => {
     }
 
     const adminId = req.user.id || req.user.sub;
+    const oldAssignees = new Set([oldTicket?.Assignee1, oldTicket?.Assignee2, oldTicket?.Assignee3].filter(Boolean));
     const newAssignees = [Assignee1, Assignee2, Assignee3].filter(Boolean);
+    const addedAssignees = newAssignees.filter((id) => !oldAssignees.has(id));
 
-    let assigneeNames = [];
-    if (newAssignees.length > 0) {
+    if (addedAssignees.length > 0) {
       const { data: adminRows } = await supabase
         .from("admin_users")
         .select("id, full_name, email")
-        .in("id", newAssignees);
+        .in("id", addedAssignees);
       const nameMap = Object.fromEntries(
-        (adminRows || []).map((a) => [
-          a.id,
-          (a.full_name || a.email || "").trim(),
-        ]),
+        (adminRows || []).map((a) => [a.id, (a.full_name || a.email || "").trim()])
       );
-      assigneeNames = newAssignees.map((aid) => nameMap[aid] || aid);
+      const addedNames = addedAssignees.map((aid) => nameMap[aid] || aid);
+      logActivity({
+        adminId,
+        actionType: "TICKET_ASSIGNED",
+        targetId: ticketId,
+        targetLabel: `Ticket ${ticketId} assigned to ${addedNames.join(", ")}`,
+        metadata: { assignees: newAssignees, added: addedAssignees, addedNames },
+      });
     }
-
-    logActivity({
-      adminId,
-      actionType: "TICKET_ASSIGNED",
-      targetType: "ticket",
-      targetId: ticketId,
-      targetLabel: assigneeNames.length
-        ? `Ticket #${ticketId} assigned to ${assigneeNames.join(", ")}`
-        : `Ticket #${ticketId}`,
-      metadata: { assignees: newAssignees, assigneeNames },
-    });
 
     return res.json({ success: true, data: data[0] });
   } catch (e) {

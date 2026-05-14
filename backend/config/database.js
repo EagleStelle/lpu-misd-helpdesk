@@ -235,7 +235,6 @@ export const initializeDatabase = async () => {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         admin_id UUID NOT NULL,
         action_type VARCHAR(50) NOT NULL,
-        target_type VARCHAR(50),
         target_id VARCHAR(100),
         target_label VARCHAR(255),
         metadata JSONB DEFAULT '{}',

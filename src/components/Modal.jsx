@@ -559,7 +559,6 @@ export function SettingsModal({ open, onClose, darkMode, onToggleDark }) {
   const [profile, setProfile] = useState({ fullName: "", email: "" });
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileLoadErr, setProfileLoadErr] = useState("");
-
   useEffect(() => {
     if (!open) return;
     let cancelled = false;

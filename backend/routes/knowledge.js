@@ -99,7 +99,6 @@ router.post("/", adminMiddleware, async (req, res) => {
   logActivity({
     adminId,
     actionType: "KNOWLEDGE_ADDED",
-    targetType: "knowledge",
     targetId: inserted[0]?.id,
     targetLabel: title?.trim() || "Knowledge Entry",
     metadata: { chunks: inserted.length, title: title?.trim() || "Knowledge Entry" },
@@ -155,8 +154,7 @@ router.put("/:id", adminMiddleware, async (req, res) => {
     logActivity({
       adminId,
       actionType: "KNOWLEDGE_EDITED",
-      targetType: "knowledge",
-      targetId: id,
+        targetId: id,
       targetLabel: resolvedTitle,
       metadata: { title: resolvedTitle },
     });
@@ -187,7 +185,6 @@ router.delete("/:id", adminMiddleware, async (req, res) => {
   logActivity({
     adminId,
     actionType: "KNOWLEDGE_DELETED",
-    targetType: "knowledge",
     targetId: id,
     targetLabel: title,
     metadata: { title },
@@ -214,7 +211,6 @@ router.delete("/bulk/by-title", adminMiddleware, async (req, res) => {
   logActivity({
     adminId,
     actionType: "KNOWLEDGE_BULK_DELETED",
-    targetType: "knowledge",
     targetLabel: title,
     metadata: { title },
   });

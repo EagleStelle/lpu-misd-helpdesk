@@ -13,23 +13,91 @@ import {
 const PAGE_SIZE = 20;
 
 const ACTION_META = {
-  TICKET_CLOSED:          { label: "Closed Ticket",           color: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/30" },
-  TICKET_REOPENED:        { label: "Reopened Ticket",         color: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/25 dark:text-green-400 dark:border-green-700/40" },
-  TICKET_ASSIGNED:        { label: "Assigned Ticket",         color: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700/30" },
-  KNOWLEDGE_ADDED:        { label: "Added Knowledge",         color: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-700/30" },
-  KNOWLEDGE_EDITED:       { label: "Edited Knowledge",        color: "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-700/30" },
-  KNOWLEDGE_DELETED:      { label: "Deleted Knowledge",       color: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/30" },
-  KNOWLEDGE_BULK_DELETED: { label: "Bulk Deleted Knowledge",  color: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/30" },
-  ADMIN_CREATED:          { label: "Created Admin",           color: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700/30" },
-  ADMIN_DELETED:          { label: "Deleted Admin",           color: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/30" },
-  ADMIN_DISABLED:         { label: "Disabled Admin",          color: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-700/30" },
-  ADMIN_ENABLED:          { label: "Enabled Admin",           color: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/25 dark:text-green-400 dark:border-green-700/40" },
-  ADMIN_LEVEL_CHANGED:    { label: "Changed Admin Level",     color: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-700/30" },
+  TICKET_CLOSED: {
+    label: "Closed Ticket",
+    color:
+      "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/30",
+  },
+  TICKET_REOPENED: {
+    label: "Reopened Ticket",
+    color:
+      "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/25 dark:text-green-400 dark:border-green-700/40",
+  },
+  TICKET_ASSIGNED: {
+    label: "Assigned Ticket",
+    color:
+      "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700/30",
+  },
+  KNOWLEDGE_ADDED: {
+    label: "Added Knowledge",
+    color:
+      "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-700/30",
+  },
+  KNOWLEDGE_EDITED: {
+    label: "Edited Knowledge",
+    color:
+      "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-700/30",
+  },
+  KNOWLEDGE_DELETED: {
+    label: "Deleted Knowledge",
+    color:
+      "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/30",
+  },
+  KNOWLEDGE_BULK_DELETED: {
+    label: "Bulk Deleted Knowledge",
+    color:
+      "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/30",
+  },
+  ADMIN_CREATED: {
+    label: "Created Admin",
+    color:
+      "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700/30",
+  },
+  ADMIN_DELETED: {
+    label: "Deleted Admin",
+    color:
+      "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-700/30",
+  },
+  ADMIN_DISABLED: {
+    label: "Disabled Admin",
+    color:
+      "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-700/30",
+  },
+  ADMIN_ENABLED: {
+    label: "Enabled Admin",
+    color:
+      "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/25 dark:text-green-400 dark:border-green-700/40",
+  },
+  ADMIN_LEVEL_CHANGED: {
+    label: "Changed Admin Level",
+    color:
+      "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-700/30",
+  },
+  PROFILE_NAME_CHANGED: {
+    label: "Profile Edit",
+    color:
+      "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-700/30",
+  },
+  PROFILE_EMAIL_CHANGED: {
+    label: "Profile Edit",
+    color:
+      "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-700/30",
+  },
+  PROFILE_PASSWORD_CHANGED: {
+    label: "Profile Edit",
+    color:
+      "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-700/30",
+  },
 };
 
-const FILTER_OPTIONS = ["All", "Ticket Actions", "Knowledge Actions", "Admin Actions"];
+const FILTER_OPTIONS = [
+  "All",
+  "Ticket Actions",
+  "Knowledge Actions",
+  "Admin Actions",
+];
 const FILTER_MAP = {
-  "All": null,
+  All: null,
   "Ticket Actions": "ticket",
   "Knowledge Actions": "knowledge",
   "Admin Actions": "admin",
@@ -62,8 +130,11 @@ export default function AdminActivity() {
   const [totalCount, setTotalCount] = useState(0);
 
   const decoded = useMemo(() => {
-    try { return jwtDecode(localStorage.getItem("authToken") || ""); }
-    catch { return null; }
+    try {
+      return jwtDecode(localStorage.getItem("authToken") || "");
+    } catch {
+      return null;
+    }
   }, []);
 
   const isGlobal = Number(decoded?.admin_level) === 0;
@@ -80,7 +151,10 @@ export default function AdminActivity() {
     fetch(apiUrl(`/api/admin/activity?${params}`), { headers: getAuthHeader() })
       .then((r) => r.json())
       .then((res) => {
-        if (!res.success) { setError(res.message || "Failed to load activity"); return; }
+        if (!res.success) {
+          setError(res.message || "Failed to load activity");
+          return;
+        }
         setLogs(res.data || []);
         setTotalCount(res.total ?? 0);
         setError("");
@@ -107,7 +181,9 @@ export default function AdminActivity() {
       if (dateFrom) params.set("dateFrom", dateFrom);
       if (dateTo) params.set("dateTo", dateTo);
 
-      const res = await fetch(apiUrl(`/api/admin/activity?${params}`), { headers: getAuthHeader() });
+      const res = await fetch(apiUrl(`/api/admin/activity?${params}`), {
+        headers: getAuthHeader(),
+      });
       const json = await res.json();
       if (!json.success) return;
 
@@ -145,7 +221,11 @@ export default function AdminActivity() {
   };
 
   useNavbarActions(
-    <NavbarActionButton icon={Download} label="Export CSV" onClick={onExportCsv} />,
+    <NavbarActionButton
+      icon={Download}
+      label="Export CSV"
+      onClick={onExportCsv}
+    />,
   );
 
   const columns = useMemo(() => {
@@ -154,16 +234,26 @@ export default function AdminActivity() {
     cols.push({
       label: "Date & Time",
       accessor: "created_at",
-      variant: "date",
-      colWidth: "w-36 md:w-40",
+      colWidth: "w-42",
+      render: (row) => {
+        const d = row.created_at ? new Date(row.created_at) : null;
+        return (
+          <span className="text-sm text-gray-500 dark:text-zinc-400 whitespace-nowrap">
+            {d
+              ? `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+              : "-"}
+          </span>
+        );
+      },
     });
 
     if (isGlobal) {
       cols.push({
         label: "Admin",
-        accessor: (row) => row.admin?.full_name || row.admin?.email || "Unknown",
+        accessor: (row) =>
+          row.admin?.full_name || row.admin?.email || "Unknown",
         variant: "title",
-        colWidth: "w-36 md:w-44",
+        colWidth: "w-52",
       });
     }
 
@@ -171,23 +261,30 @@ export default function AdminActivity() {
       label: "Action",
       accessor: "action_type",
       render: (row) => {
-        const meta = ACTION_META[row.action_type] || { label: row.action_type, color: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700" };
+        const meta = ACTION_META[row.action_type] || {
+          label: row.action_type,
+          color:
+            "bg-gray-100 text-gray-700 border-gray-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700",
+        };
         return (
-          <span className={`h-9 inline-flex items-center justify-center px-3 text-sm font-bold rounded-lg border transition-all whitespace-nowrap ${meta.color}`}>
+          <span
+            className={`h-9 flex items-center justify-center px-3 text-sm font-bold rounded-lg border transition-all whitespace-nowrap w-full ${meta.color}`}
+          >
             {meta.label}
           </span>
         );
       },
-      colWidth: "w-44 md:w-52",
+      colWidth: "w-40 md:w-44",
     });
 
     cols.push({
       label: "Target",
+      colWidth: "",
       render: (row) => {
         const text = row.target_label || row.target_id || "—";
         return (
           <span
-            className="block max-w-xs truncate text-sm text-gray-600 dark:text-zinc-400"
+            className="block w-full truncate text-sm text-gray-600 dark:text-zinc-400"
             title={text}
           >
             {text}

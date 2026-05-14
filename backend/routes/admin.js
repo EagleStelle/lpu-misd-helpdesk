@@ -361,7 +361,6 @@ router.post("/admins", globalAdminMiddleware, async (req, res) => {
         logActivity({
             adminId: callerId,
             actionType: "ADMIN_CREATED",
-            targetType: "admin",
             targetId: created.id,
             targetLabel: created.full_name || created.email,
             metadata: { email: created.email, admin_level: level },
@@ -438,7 +437,6 @@ router.delete("/admins/:adminId", globalAdminMiddleware, async (req, res) => {
         logActivity({
             adminId: callerId,
             actionType: "ADMIN_DELETED",
-            targetType: "admin",
             targetId: target.id,
             targetLabel: target.full_name || target.email,
             metadata: { email: target.email, admin_level: target.admin_level },
@@ -500,7 +498,6 @@ router.patch("/admins/:adminId", globalAdminMiddleware, async (req, res) => {
             logActivity({
                 adminId: callerId,
                 actionType: updates.is_active ? "ADMIN_ENABLED" : "ADMIN_DISABLED",
-                targetType: "admin",
                 targetId: adminId,
                 targetLabel: updated.full_name || updated.email,
                 metadata: { email: updated.email },
@@ -511,7 +508,6 @@ router.patch("/admins/:adminId", globalAdminMiddleware, async (req, res) => {
             logActivity({
                 adminId: callerId,
                 actionType: "ADMIN_LEVEL_CHANGED",
-                targetType: "admin",
                 targetId: adminId,
                 targetLabel: `${updated.full_name || updated.email}, set to ${levelName}`,
                 metadata: { email: updated.email, new_level: updates.admin_level },
@@ -556,7 +552,7 @@ router.get("/activity", adminMiddleware, async (req, res) => {
         } else if (type === "knowledge") {
             query = query.like("action_type", "KNOWLEDGE_%");
         } else if (type === "admin") {
-            query = query.like("action_type", "ADMIN_%");
+            query = query.or("action_type.like.ADMIN_%,action_type.like.PROFILE_%");
         }
 
         if (dateFrom) {

@@ -290,7 +290,7 @@ export function DataTable({
   };
 
   const getColumnWidthClass = (col) => {
-    if (col.colWidth) return col.colWidth;
+    if (col.colWidth != null) return col.colWidth;
     switch (col.variant) {
       case "badge":
         return "w-20 md:w-28";

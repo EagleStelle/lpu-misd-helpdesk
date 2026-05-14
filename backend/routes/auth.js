@@ -10,6 +10,7 @@ import {
     generateToken,
 } from "../services/authService.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { logActivity } from "../services/activityService.js";
 
 const router = express.Router();
 
@@ -148,6 +149,8 @@ router.put("/me", authMiddleware, async (req, res) => {
         const appRole = req.user.app_role || "user";
         const namePayload = fullName !== undefined ? fullName : full_name;
 
+        const oldProfile = appRole === "admin" ? await getMeProfile(userId, appRole) : null;
+
         const result = await updateOwnAccountProfile(userId, appRole, {
             fullName: namePayload,
             email,
@@ -157,6 +160,16 @@ router.put("/me", authMiddleware, async (req, res) => {
 
         if (!result.success) {
             return res.status(400).json(result);
+        }
+
+        if (appRole === "admin" && oldProfile?.success) {
+            const old = oldProfile.user;
+            if (namePayload !== undefined && old.full_name !== namePayload) {
+                logActivity({ adminId: userId, actionType: "PROFILE_NAME_CHANGED", targetLabel: `Full name changed to ${namePayload}` });
+            }
+            if (email !== undefined && old.email !== email) {
+                logActivity({ adminId: userId, actionType: "PROFILE_EMAIL_CHANGED", targetLabel: `Email changed to ${email}` });
+            }
         }
 
         const adminLevel = appRole === "admin" ? (req.user.admin_level ?? 1) : null;
@@ -205,6 +218,10 @@ router.post("/change-password", authMiddleware, async (req, res) => {
 
         if (!result.success) {
             return res.status(400).json(result);
+        }
+
+        if (appRole === "admin") {
+            logActivity({ adminId: userId, actionType: "PROFILE_PASSWORD_CHANGED", targetLabel: "Password changed" });
         }
 
         return res.status(200).json(result);
