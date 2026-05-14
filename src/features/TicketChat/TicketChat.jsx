@@ -56,8 +56,8 @@ export default function TicketChat({ adminView = false } = {}) {
     const adminName =
       role === "admin"
         ? (senderId && adminDirectory[senderId]) ||
-          (emailKey && adminDirectory[emailKey]) ||
-          ""
+        (emailKey && adminDirectory[emailKey]) ||
+        ""
         : "";
 
     if (adminName) return adminName;
@@ -667,15 +667,15 @@ export default function TicketChat({ adminView = false } = {}) {
             return prev.map((m) =>
               m.id === tempId
                 ? {
-                    id: row.id,
-                    senderId: row.sender_id,
-                    senderRole: row.sender_role,
-                    senderName: row.sender_name || senderName,
-                    senderEmail: row.sender_email || senderEmail || null,
-                    text: row.message_text,
-                    attachments: parseMessageAttachments(row.attachments),
-                    time: row.created_at,
-                  }
+                  id: row.id,
+                  senderId: row.sender_id,
+                  senderRole: row.sender_role,
+                  senderName: row.sender_name || senderName,
+                  senderEmail: row.sender_email || senderEmail || null,
+                  text: row.message_text,
+                  attachments: parseMessageAttachments(row.attachments),
+                  time: row.created_at,
+                }
                 : m,
             );
           });
@@ -832,8 +832,8 @@ export default function TicketChat({ adminView = false } = {}) {
   const headerInitial = creatorName.trim().charAt(0).toUpperCase();
 
   return (
-    <div className="flex flex-col w-full h-full max-h-full overflow-hidden bg-gray-50">
-      <div className="flex flex-col flex-1 min-h-0 w-full max-w-5xl mx-auto bg-white sm:my-2 sm:rounded-2xl border-t-[6px] border-t-lpu-maroon overflow-hidden shadow-md">
+    <div className="flex flex-col w-full h-full max-h-full overflow-hidden bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
+      <div className="flex flex-col flex-1 min-h-0 w-full max-w-5xl mx-auto bg-white dark:bg-zinc-900 sm:my-2 sm:rounded-2xl border-t-[6px] border-t-lpu-maroon overflow-hidden shadow-md dark:shadow-2xl dark:border-zinc-800 transition-colors duration-300">
         <ChatHeader
           adminView={adminView}
           creatorName={creatorName}

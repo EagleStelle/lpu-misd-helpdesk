@@ -15,12 +15,12 @@ export default function ChatHeader({
     : [];
 
   return (
-    <div className="flex items-center p-3 border-b border-gray-100 bg-white shrink-0">
+    <div className="flex items-center p-3 border-b border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shrink-0 transition-colors duration-300">
       <button
-        className="p-2 mr-2 rounded-full hover:bg-gray-100 transition-colors shrink-0 cursor-pointer"
+        className="p-2 mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer"
         onClick={onBack}
       >
-        <ArrowLeft size={18} className="text-gray-600" />
+        <ArrowLeft size={18} className="text-gray-600 dark:text-zinc-400" />
       </button>
 
       {/* scrollable carousel for identities */}
@@ -31,10 +31,10 @@ export default function ChatHeader({
               {headerInitial || "s"}
             </div>
             <div className="min-w-0">
-              <div className="font-semibold text-gray-900 truncate text-xs">
+              <div className="font-semibold text-gray-900 dark:text-zinc-100 truncate text-xs">
                 {creatorName}
               </div>
-              <div className="text-[10px] text-gray-500 truncate">
+              <div className="text-[10px] text-gray-500 dark:text-zinc-400 truncate">
                 {creatorEmail?.toLowerCase()}
               </div>
             </div>
@@ -47,10 +47,10 @@ export default function ChatHeader({
                   <Bot size={18} />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-semibold text-gray-900 text-xs">
+                  <div className="font-semibold text-gray-900 dark:text-zinc-100 text-xs">
                     Stella
                   </div>
-                  <div className="text-[10px] text-gray-400 truncate">
+                  <div className="text-[10px] text-gray-400 dark:text-zinc-500 truncate">
                     MISD Support Bot
                   </div>
                 </div>
@@ -59,14 +59,14 @@ export default function ChatHeader({
 
             {participants.map((p) => (
               <div key={p.id} className="flex items-center gap-3 shrink-0">
-                <div className="w-9 h-9 bg-lpu-maroon/10 text-lpu-maroon rounded-full flex items-center justify-center font-bold border border-lpu-maroon/20 shrink-0 text-sm">
+                <div className="w-9 h-9 bg-lpu-maroon/10 text-lpu-maroon dark:bg-lpu-maroon/20 dark:text-lpu-gold rounded-full flex items-center justify-center font-bold border border-lpu-maroon/20 dark:border-lpu-maroon/30 shrink-0 text-sm">
                   {(p.name || "A").trim().charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-semibold text-xs text-gray-800 truncate">
+                  <div className="font-semibold text-xs text-gray-800 dark:text-zinc-200 truncate">
                     {p.name}
                   </div>
-                  <div className="text-[10px] text-gray-400 truncate">
+                  <div className="text-[10px] text-gray-400 dark:text-zinc-500 truncate">
                     {p.email?.toLowerCase()}
                   </div>
                 </div>

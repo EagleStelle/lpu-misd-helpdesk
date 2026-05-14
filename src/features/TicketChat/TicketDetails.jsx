@@ -85,25 +85,25 @@ export default function TicketDetails({
   ];
 
   return (
-    <div className="bg-white border-b border-gray-100 shrink-0 overflow-hidden">
+    <div className="bg-white dark:!bg-zinc-900 border-b border-gray-100 dark:border-zinc-800 shrink-0 overflow-hidden transition-colors duration-300">
       {/* Main Header Row */}
       <div className="px-4 py-3 flex items-center justify-between gap-4">
         {/* Left Side: Identity & Status */}
         <div className="flex items-center gap-3">
-          <span className="font-mono font-bold text-lpu-maroon text-sm">
+          <span className="font-mono font-bold text-lpu-maroon dark:text-lpu-gold text-sm">
             #{ticket.id}
           </span>
           <span
-            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${statusText.toLowerCase() === "open"
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-600"
+            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 ${statusText.toLowerCase() === "open"
+              ? "bg-green-100 text-green-700 dark:!bg-green-900/40 dark:text-green-400"
+              : "bg-gray-100 text-gray-600 dark:!bg-zinc-800 dark:text-zinc-400"
               }`}
           >
             {statusText}
           </span>
           <button
             onClick={onCloseTicket}
-            className="text-[10px] font-bold uppercase text-lpu-maroon hover:underline decoration-lpu-gold underline-offset-2 ml-1"
+            className="text-[10px] font-bold uppercase text-lpu-maroon dark:text-lpu-gold hover:underline decoration-lpu-gold dark:decoration-lpu-maroon underline-offset-2 ml-1"
           >
             {isTicketClosed(ticket) ? "Reopen" : "Close"}
           </button>
@@ -112,17 +112,17 @@ export default function TicketDetails({
         {/* Right Side: Created Info + Summary Toggle */}
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="text-right hidden sm:flex flex-col justify-center">
-            <span className="text-[9px] font-bold text-gray-400 uppercase leading-none mb-0.5">
+            <span className="text-[9px] font-bold text-gray-400 dark:text-zinc-500 uppercase leading-none mb-0.5">
               Created
             </span>
-            <span className="text-xs text-gray-600 font-medium whitespace-nowrap">
+            <span className="text-xs text-gray-600 dark:text-zinc-300 font-medium whitespace-nowrap">
               {formatDateTime(ticket.created_at)}
             </span>
           </div>
 
           <button
             onClick={onToggleTimeline}
-            className="bg-white text-lpu-maroon border border-lpu-maroon/30 p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold transition-all shadow-sm active:scale-95 shrink-0"
+            className="bg-white dark:!bg-zinc-800 text-lpu-maroon dark:text-lpu-gold border border-lpu-maroon/30 dark:border-lpu-gold/30 p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold dark:hover:bg-lpu-maroon hover:text-lpu-maroon dark:hover:text-lpu-gold hover:border-lpu-gold dark:hover:border-lpu-maroon transition-all shadow-sm active:scale-95 shrink-0"
           >
             <Clock size={16} />
             <span className="hidden sm:inline font-bold uppercase text-xs tracking-tight">
@@ -137,7 +137,7 @@ export default function TicketDetails({
 
           <button
             onClick={onToggleSummary}
-            className="bg-lpu-maroon text-white border border-lpu-maroon p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold transition-all shadow-lg shadow-lpu-maroon/20 active:scale-95 shrink-0"
+            className="bg-lpu-maroon dark:!bg-lpu-maroon text-white dark:text-white border border-lpu-maroon p-2.5 sm:px-4 sm:py-2 rounded-xl flex items-center gap-2 hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold transition-all shadow-lg shadow-lpu-maroon/20 dark:shadow-none active:scale-95 shrink-0"
           >
             <FileText size={16} />
             <span className="hidden sm:inline font-bold uppercase text-xs tracking-tight">
@@ -154,103 +154,103 @@ export default function TicketDetails({
 
       {/* Timeline Section */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50 ${expandedTimeline ? "max-h-130 border-t border-gray-100" : "max-h-0"
+        className={`overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50 dark:!bg-zinc-950/30 ${expandedTimeline ? "max-h-130 border-t border-gray-100 dark:border-zinc-800" : "max-h-0"
           }`}
       >
         <div className="p-4 sm:p-5 space-y-3 overflow-y-auto max-h-130">
           {snapshots.length === 0 ? (
-            <div className="text-sm text-gray-500 italic">No timeline yet.</div>
+            <div className="text-sm text-gray-500 dark:text-zinc-500 italic">No timeline yet.</div>
           ) : (
             snapshots.map((s, idx) => (
               <div
                 key={s.key || idx}
-                className="rounded-xl border border-gray-200 bg-white"
+                className="rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:!bg-zinc-800 shadow-sm transition-colors duration-300"
               >
-                <div className="px-4 py-2.5 flex items-center justify-between gap-4 border-b border-gray-100">
-                  <div className="text-[11px] font-extrabold uppercase tracking-widest text-gray-600">
+                <div className="px-4 py-2.5 flex items-center justify-between gap-4 border-b border-gray-100 dark:border-zinc-800">
+                  <div className="text-[11px] font-extrabold uppercase tracking-widest text-gray-600 dark:text-zinc-400">
                     {s.source === "history"
                       ? "Previous"
                       : s.closed_at
                         ? "Closed"
                         : "Active"}
                   </div>
-                  <div className="text-[11px] font-bold text-gray-500 whitespace-nowrap">
+                  <div className="text-[11px] font-bold text-gray-500 dark:text-zinc-500 whitespace-nowrap">
                     {s.closed_at ? formatDateTime(s.closed_at) : "—"}
                   </div>
                 </div>
 
-                <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-6 bg-white/50 dark:!bg-zinc-900/50 rounded-b-xl">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
                       Priority
                     </span>
-                    <span className="text-sm text-gray-900 font-semibold">
+                    <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
                       {s.priority || "—"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
                       Timer started
                     </span>
-                    <span className="text-sm text-gray-900 font-semibold">
+                    <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
                       {s.timer_started_at
                         ? formatDateTime(s.timer_started_at)
                         : "—"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
                       SLA due
                     </span>
-                    <span className="text-sm text-gray-900 font-semibold">
+                    <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
                       {s.sla_due_at ? formatDateTime(s.sla_due_at) : "—"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
                       Remaining
                     </span>
-                    <span className="text-sm font-extrabold text-gray-900">
+                    <span className="text-sm font-extrabold text-gray-900 dark:text-zinc-100">
                       {s.remaining || "—"}
                     </span>
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
                       SLA minutes
                     </span>
-                    <span className="text-sm text-gray-900 font-semibold">
+                    <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
                       {s.sla_minutes ?? "—"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
                       Timer stopped
                     </span>
-                    <span className="text-sm text-gray-900 font-semibold">
+                    <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
                       {s.timer_stopped_at
                         ? formatDateTime(s.timer_stopped_at)
                         : "—"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
                       Duration
                     </span>
-                    <span className="text-sm text-gray-900 font-semibold">
+                    <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
                       {s.duration || "—"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
                       SLA met
                     </span>
                     <span
                       className={`text-sm font-extrabold ${s.sla_met === true
-                          ? "text-emerald-700"
-                          : s.sla_met === false
-                            ? "text-red-600"
-                            : "text-gray-600"
+                        ? "text-emerald-700 dark:text-emerald-500"
+                        : s.sla_met === false
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-gray-600 dark:text-zinc-500"
                         }`}
                     >
                       {s.sla_met === true
@@ -269,39 +269,39 @@ export default function TicketDetails({
 
       {/* Summary Section */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50 ${expandedSummary ? "max-h-40 border-t border-gray-100" : "max-h-0"
+        className={`overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50 dark:!bg-zinc-950/30 ${expandedSummary ? "max-h-40 border-t border-gray-100 dark:border-zinc-800" : "max-h-0"
           }`}
       >
-        <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-6 bg-white/50 dark:!bg-zinc-900/50">
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
               Type
             </span>
-            <span className="text-sm text-gray-900 font-semibold">
+            <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
               {ticket.Type || "N/A"}
             </span>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
               Department
             </span>
-            <span className="text-sm text-gray-900 font-semibold">
+            <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
               {ticket.Department || "N/A"}
             </span>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
               Category
             </span>
-            <span className="text-sm text-gray-900 font-semibold">
+            <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
               {ticket.Category || "N/A"}
             </span>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold text-lpu-maroon/60 uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-lpu-maroon/60 dark:text-lpu-gold/60 uppercase tracking-widest">
               Site
             </span>
-            <span className="text-sm text-gray-900 font-semibold">
+            <span className="text-sm text-gray-900 dark:text-zinc-100 font-semibold">
               {ticket.Site || "N/A"}
             </span>
           </div>
