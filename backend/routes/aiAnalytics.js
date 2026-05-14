@@ -180,14 +180,23 @@ router.get("/check", adminMiddleware, async (req, res) => {
     return res.status(400).json({ success: false, error: "Valid period_type required" });
   }
   try {
-    const { key: resolvedKey } = getPeriodRange(period_type, period_key, customStart, customEnd);
-    const { data } = await supabase
-      .from("ai_insights")
-      .select("id")
-      .eq("period_type", period_type)
-      .eq("period_key", resolvedKey)
-      .maybeSingle();
-    res.json({ success: true, analyzed: !!data });
+    const { since, until, key: resolvedKey } = getPeriodRange(period_type, period_key, customStart, customEnd);
+    const [{ data }, { count: ticketCount }] = await Promise.all([
+      supabase
+        .from("ai_insights")
+        .select("id")
+        .eq("period_type", period_type)
+        .eq("period_key", resolvedKey)
+        .maybeSingle(),
+      supabase
+        .from("Tickets")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "Closed")
+        .not("closed_at", "is", null)
+        .gte("closed_at", since.toISOString())
+        .lte("closed_at", until.toISOString()),
+    ]);
+    res.json({ success: true, analyzed: !!data, ticketCount: ticketCount || 0 });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -354,33 +363,38 @@ Return ONLY valid JSON:
     const totalFeedbackComments = satisfiedComments.length + dissatisfiedComments.length;
 
     if (totalFeedbackComments >= 3) {
-      const fbPrompt = `Generalize these user feedback comments into short themes. Group similar sentiments.
+      const fbPrompt = `Generalize these user feedback comments into short themes. Group similar sentiments and count how many comments belong to each theme.
 STRICT RULES:
 - Only use what is explicitly stated in the comments below. Do not invent or infer.
 - If a category shows "(none)", you MUST return [] for that array.
 - If comments are too sparse or vague, return [] rather than guessing.
+- "count" must reflect how many of the provided comments match that theme (total across both lists should sum to total comments in that category).
 
 Satisfied (${satisfiedComments.length} comments):
-${satisfiedComments.slice(0, 30).map((c) => `- "${c}"`).join("\n") || "(none)"}
+${satisfiedComments.slice(0, 30).map((c, i) => `${i+1}. "${c}"`).join("\n") || "(none)"}
 
 Dissatisfied (${dissatisfiedComments.length} comments):
-${dissatisfiedComments.slice(0, 30).map((c) => `- "${c}"`).join("\n") || "(none)"}
+${dissatisfiedComments.slice(0, 30).map((c, i) => `${i+1}. "${c}"`).join("\n") || "(none)"}
 
 Return ONLY valid JSON:
-{"satisfied_themes":["string"],"dissatisfied_themes":["string"]}`;
+{"satisfied_themes":[{"theme":"string","count":N}],"dissatisfied_themes":[{"theme":"string","count":N}]}`;
 
       try {
         const raw = await callGroq(
           [
-            { role: "system", content: "Summarize feedback into themes. Only from provided comments, no invention. Return JSON. Max 6 themes each." },
+            { role: "system", content: "Summarize feedback into themes with counts. Only from provided comments, no invention. Return JSON with theme+count objects. Max 6 themes each." },
             { role: "user", content: fbPrompt },
           ],
           500,
         );
         const parsed = parseJson(raw);
         if (parsed) {
-          satisfiedThemes = (parsed.satisfied_themes || []).slice(0, 6);
-          dissatisfiedThemes = (parsed.dissatisfied_themes || []).slice(0, 6);
+          satisfiedThemes = (parsed.satisfied_themes || [])
+            .filter((t) => t?.theme?.trim())
+            .slice(0, 6);
+          dissatisfiedThemes = (parsed.dissatisfied_themes || [])
+            .filter((t) => t?.theme?.trim())
+            .slice(0, 6);
         }
       } catch (err) {
         console.error("[AI Analytics] Feedback analysis error:", err.message);

@@ -322,27 +322,52 @@ function FeedbackCard({ positive, themes }) {
   const numBg = positive
     ? "bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400"
     : "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400";
+  const bar = positive ? "bg-green-500" : "bg-rose-500";
+
+  // support both legacy string[] and new {theme,count}[]
+  const normalized = themes.map((t) =>
+    typeof t === "string" ? { theme: t, count: null } : t,
+  );
+  const maxCount = normalized.reduce((m, t) => Math.max(m, t.count || 0), 1);
 
   return (
     <Card>
       <CardHeader icon={Icon} title={title} />
       <div className="px-4 py-3">
-        {themes.length > 0 ? (
-          themes.map((t, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-3 py-3 border-b border-gray-100 dark:border-white/5 last:border-0"
-            >
-              <span
-                className={`shrink-0 mt-0.5 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold ${numBg}`}
+        {normalized.length > 0 ? (
+          normalized.map((t, i) => {
+            const pct = t.count != null ? Math.round((t.count / maxCount) * 100) : 0;
+            return (
+              <div
+                key={i}
+                className="flex items-start gap-3 py-3 border-b border-gray-100 dark:border-white/5 last:border-0"
               >
-                {i + 1}
-              </span>
-              <span className="text-sm text-gray-700 dark:text-zinc-200 leading-relaxed">
-                {t}
-              </span>
-            </div>
-          ))
+                <span className={`shrink-0 mt-0.5 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold ${numBg}`}>
+                  {i + 1}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-sm font-semibold text-gray-800 dark:text-zinc-100 flex-1">
+                      {t.theme}
+                    </span>
+                    {t.count != null && (
+                      <span className="shrink-0 text-xs font-bold text-gray-400 dark:text-zinc-500 tabular-nums">
+                        {t.count}
+                      </span>
+                    )}
+                  </div>
+                  {t.count != null && (
+                    <div className="h-1 w-full bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${bar} rounded-full transition-all duration-500`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
         ) : (
           <p className="text-sm text-gray-400 dark:text-zinc-500 text-center py-4 italic">
             No feedback comments to analyze
@@ -529,6 +554,7 @@ export default function AdminAIAnalytics() {
     new Date().toISOString().slice(0, 10),
   );
 
+  const [periodTicketCount, setPeriodTicketCount] = useState(null);
   const [addedEntries, setAddedEntries] = useState(new Set());
   const [addingEntry, setAddingEntry] = useState(null);
   const [kbError, setKbError] = useState(null);
@@ -547,7 +573,10 @@ export default function AdminAIAnalytics() {
         headers: getAuthHeader(),
       });
       const d = await r.json();
-      if (d.success) setAlreadyAnalyzed(d.analyzed);
+      if (d.success) {
+        setAlreadyAnalyzed(d.analyzed);
+        setPeriodTicketCount(d.ticketCount ?? null);
+      }
     } catch {
       /* non-fatal */
     } finally {
@@ -714,6 +743,7 @@ export default function AdminAIAnalytics() {
     />,
   );
 
+  const unanalyzedCount = alreadyAnalyzed ? 0 : (periodTicketCount ?? null);
   const unknownRe = /^(unknown|unidentified|other issue|n\/a|none|unclear|unspecified)$/i;
   const problems = [...(results?.results?.problems || [])]
     .filter((p) => p.issue && !unknownRe.test(p.issue.trim()))
@@ -743,96 +773,120 @@ export default function AdminAIAnalytics() {
     <section className="w-full max-w-330 mx-auto px-6 py-4 md:py-6 font-poppins dark:text-gray-100">
       <div className="flex flex-col gap-4">
         {/* ── Run Analysis ── */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            {/* Left: period tabs + date input */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5">
-                {PERIOD_TYPES.map((pt) => (
-                  <ToggleBtn
-                    key={pt.value}
-                    active={periodType === pt.value}
-                    onClick={() => {
-                      setPeriodType(pt.value);
-                      if (pt.value !== "custom")
-                        setPeriodKey(defaultPeriodKey(pt.value));
-                      setAlreadyAnalyzed(false);
-                      setCheckingPeriod(true);
-                      setError(null);
-                    }}
-                    label={pt.label}
-                  />
-                ))}
+        <Card>
+          <CardHeader
+            icon={Sparkles}
+            title="Run Analysis"
+            aside={
+              status != null ? (
+                <span className="flex items-center gap-2 text-xs">
+                  <span>
+                    <span className="font-semibold tabular-nums text-gray-800 dark:text-zinc-200">
+                      {status.totalClosed}
+                    </span>
+                    <span className="ml-1 text-gray-400 dark:text-zinc-500">total closed</span>
+                  </span>
+                  <span className="text-gray-200 dark:text-white/10 select-none">·</span>
+                  <span>
+                    <span className="font-semibold tabular-nums text-gray-800 dark:text-zinc-200">
+                      {checkingPeriod ? "—" : (unanalyzedCount ?? "—")}
+                    </span>
+                    <span className="ml-1 text-gray-400 dark:text-zinc-500">unanalyzed</span>
+                  </span>
+                </span>
+              ) : null
+            }
+          />
+          <div className="px-4 py-3 space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              {/* Left: period tabs + date input */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5">
+                  {PERIOD_TYPES.map((pt) => (
+                    <ToggleBtn
+                      key={pt.value}
+                      active={periodType === pt.value}
+                      onClick={() => {
+                        setPeriodType(pt.value);
+                        if (pt.value !== "custom")
+                          setPeriodKey(defaultPeriodKey(pt.value));
+                        setAlreadyAnalyzed(false);
+                        setCheckingPeriod(true);
+                        setError(null);
+                      }}
+                      label={pt.label}
+                    />
+                  ))}
+                </div>
+
+                <PeriodInput
+                  periodType={periodType}
+                  periodKey={periodKey}
+                  setPeriodKey={setPeriodKey}
+                  customStart={customStart}
+                  setCustomStart={setCustomStart}
+                  customEnd={customEnd}
+                  setCustomEnd={setCustomEnd}
+                />
               </div>
 
-              <PeriodInput
-                periodType={periodType}
-                periodKey={periodKey}
-                setPeriodKey={setPeriodKey}
-                customStart={customStart}
-                setCustomStart={setCustomStart}
-                customEnd={customEnd}
-                setCustomEnd={setCustomEnd}
-              />
-            </div>
-
-            {/* Right: action buttons */}
-            <div className="flex items-center gap-1.5">
-              <div
-                title={
-                  periodType === "custom"
-                    ? "Custom range is view-only, please select a fixed period to analyze"
-                    : undefined
-                }
-              >
-                <button
-                  type="button"
-                  onClick={() => runAnalysis(false)}
-                  disabled={
-                    analyzing ||
-                    checkingPeriod ||
-                    alreadyAnalyzed ||
+              {/* Right: action buttons */}
+              <div className="flex items-center gap-1.5">
+                <div
+                  title={
                     periodType === "custom"
+                      ? "Custom range is view-only, please select a fixed period to analyze"
+                      : undefined
                   }
-                  className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold bg-lpu-maroon text-white border border-lpu-maroon hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  {analyzing ? (
-                    <RefreshCw size={11} className="animate-spin" />
-                  ) : (
-                    <Play size={11} />
-                  )}
-                  Analyze
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => runAnalysis(false)}
+                    disabled={
+                      analyzing ||
+                      checkingPeriod ||
+                      alreadyAnalyzed ||
+                      periodType === "custom"
+                    }
+                    className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold bg-lpu-maroon text-white border border-lpu-maroon hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    {analyzing ? (
+                      <RefreshCw size={11} className="animate-spin" />
+                    ) : (
+                      <Play size={11} />
+                    )}
+                    Analyze
+                  </button>
+                </div>
 
-              <div
-                title={
-                  periodType === "custom"
-                    ? "Custom range is view-only — select a fixed period to analyze"
-                    : undefined
-                }
-              >
-                <button
-                  type="button"
-                  onClick={() => runAnalysis(true)}
-                  disabled={analyzing || periodType === "custom"}
-                  className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold bg-white dark:bg-zinc-900 text-lpu-maroon dark:text-lpu-gold border border-lpu-maroon dark:border-lpu-gold hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold dark:hover:bg-lpu-gold dark:hover:text-lpu-maroon dark:hover:border-lpu-gold active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                <div
+                  title={
+                    periodType === "custom"
+                      ? "Custom range is view-only — select a fixed period to analyze"
+                      : undefined
+                  }
                 >
-                  <AlertTriangle size={11} />
-                  Force Analyze
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => runAnalysis(true)}
+                    disabled={analyzing || periodType === "custom"}
+                    className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold bg-white dark:bg-zinc-900 text-lpu-maroon dark:text-lpu-gold border border-lpu-maroon dark:border-lpu-gold hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold dark:hover:bg-lpu-gold dark:hover:text-lpu-maroon dark:hover:border-lpu-gold active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <AlertTriangle size={11} />
+                    Force Analyze
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* ── error only ── */}
-        {error && !analyzing && (
-          <div className="flex items-center gap-2.5 px-4 py-3 bg-[#FDEBEC] dark:bg-rose-950/20 border border-red-100 dark:border-rose-800 rounded-xl text-sm text-[#9F2F2D] dark:text-rose-400">
-            <XCircle size={14} className="shrink-0" />
-            {error}
+            {error && !analyzing && (
+              <div className="flex items-center gap-2.5 px-4 py-3 bg-[#FDEBEC] dark:bg-rose-950/20 border border-red-100 dark:border-rose-800 rounded-xl text-sm text-[#9F2F2D] dark:text-rose-400">
+                <XCircle size={14} className="shrink-0" />
+                {error}
+              </div>
+            )}
           </div>
-        )}
+        </Card>
 
         {/* ── results ── */}
         {analyzing ? (
