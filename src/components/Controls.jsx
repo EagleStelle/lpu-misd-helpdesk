@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, ChevronDown } from "lucide-react";
 
 export const FilterSelect = ({ value, onChange, options }) => {
@@ -29,6 +29,12 @@ export const SearchInput = ({
   defaultValue = "",
 }) => {
   const [value, setValue] = useState(defaultValue);
+
+  // Sync internal value with defaultValue when it changes (e.g. on navigation back)
+  useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
+
   const commit = () => onSearch(value);
   const handleKeyDown = (e) => {
     if (e.key === "Enter") commit();

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { getApiBaseUrl } from "../../utils/apiBaseUrl";
-import { Download, X, ChevronDown } from "lucide-react";
+import { Download, X, ChevronDown, MessageCircle } from "lucide-react";
 import { realtimeSupabase } from "../../lib/realtimeSupabaseClient";
 import { useLoading } from "../../context/LoadingContext";
 import {
@@ -10,7 +10,8 @@ import {
   NavbarActionButton,
 } from "../../context/NavbarActionsContext";
 import { FilterSelect, SearchInput } from "../../components/Controls";
-import { DataTable } from "../../components/DataTable";
+import { DataTable, TableButton } from "../../components/DataTable";
+import { Modal } from "../../components/Modal";
 import { DateRangeFilter } from "../../components/DateRangeFilter";
 
 const PAGE_SIZE = 10;
@@ -157,13 +158,20 @@ export default function AdminTickets() {
   const { showLoading, hideLoading } = useLoading();
   const [tickets, setTickets] = useState([]);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState("Open Tickets");
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(0);
+  const [filter, setFilter] = useState(() => {
+    return localStorage.getItem("admin_ticket_filter") || "Open Tickets";
+  });
+  const [search, setSearch] = useState(() => {
+    return localStorage.getItem("admin_ticket_search") || "";
+  });
+  const [page, setPage] = useState(() => {
+    return parseInt(localStorage.getItem("admin_ticket_page") || "0");
+  });
   const [totalCount, setTotalCount] = useState(0);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [realtimeTick, setRealtimeTick] = useState(0);
+  const [selectedCommentTicket, setSelectedCommentTicket] = useState(null);
 
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
   const role = localStorage.getItem("userRole");
@@ -236,7 +244,7 @@ export default function AdminTickets() {
         }
 
         if (dateFrom) q = q.gte("created_at", dateFrom);
-        if (dateTo)   q = q.lte("created_at", dateTo + "T23:59:59");
+        if (dateTo) q = q.lte("created_at", dateTo + "T23:59:59");
 
         q = buildSearchFilter(q, search);
 
@@ -284,11 +292,16 @@ export default function AdminTickets() {
 
   const handleSearch = (val) => {
     setSearch(val);
+    localStorage.setItem("admin_ticket_search", val);
     setPage(0);
+    localStorage.setItem("admin_ticket_page", "0");
   };
   const handleFilter = (e) => {
-    setFilter(e.target.value);
+    const nextFilter = e.target.value;
+    setFilter(nextFilter);
+    localStorage.setItem("admin_ticket_filter", nextFilter);
     setPage(0);
+    localStorage.setItem("admin_ticket_page", "0");
   };
 
   const onExportCsv = async () => {
@@ -308,7 +321,7 @@ export default function AdminTickets() {
       }
 
       if (dateFrom) q = q.gte("created_at", dateFrom);
-      if (dateTo)   q = q.lte("created_at", dateTo + "T23:59:59");
+      if (dateTo) q = q.lte("created_at", dateTo + "T23:59:59");
 
       q = buildSearchFilter(q, search);
 
@@ -481,7 +494,18 @@ export default function AdminTickets() {
         getDisplayValue: (_row, value) => value || "Set priority…",
       },
       { label: "Summary", accessor: "Summary", variant: "title" },
-      { label: "Description", accessor: "Description", variant: "subtitle" },
+      {
+        label: "Description",
+        accessor: "Description",
+        render: (row) => (
+          <div
+            className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-1 italic py-1"
+            title={row.Description}
+          >
+            {row.Description || "-"}
+          </div>
+        ),
+      },
       {
         label: "Assignees",
         colWidth: "w-45 md:w-55",
@@ -503,11 +527,41 @@ export default function AdminTickets() {
       { label: "Created", accessor: "created_at", variant: "date" },
       {
         label: "Actions",
-        variant: "action",
+        colWidth: "w-28 md:w-32",
         preventRowClick: true,
-        getLabel: (t) => (isClosed(t) ? "Reopen" : "Close"),
-        isPrimary: (t) => isClosed(t),
-        onClick: (t) => toggleTicketStatus(t),
+        render: (row) => {
+          const isClosedStatus = isClosed(row);
+          return (
+            <div className="flex flex-col gap-2 py-1">
+              <TableButton
+                onClick={() => toggleTicketStatus(row)}
+                variant={isClosedStatus ? "primary" : "secondary"}
+                className="w-full"
+              >
+                {isClosedStatus ? "Reopen" : "Close"}
+              </TableButton>
+              {row.satisfaction_comment && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedCommentTicket(row);
+                  }}
+                  className="flex items-center justify-center gap-1 w-full px-1.5 py-1.5 bg-lpu-gold/10 hover:bg-lpu-gold/20 dark:bg-lpu-gold/5 dark:hover:bg-lpu-gold/10 text-yellow-700 dark:text-lpu-gold rounded-lg border border-lpu-gold/30 dark:border-lpu-gold/20 transition-all group/feedback shadow-sm"
+                  title="View User Feedback"
+                >
+                  <MessageCircle
+                    size={12}
+                    className="shrink-0 animate-bounce group-hover/feedback:animate-none"
+                  />
+                  <span className="text-[10px] font-black uppercase tracking-normal">
+                    Feedback
+                  </span>
+                </button>
+              )}
+            </div>
+          );
+        },
       },
     ],
     [
@@ -534,27 +588,23 @@ export default function AdminTickets() {
 
   return (
     <section className="w-full max-w-330 mx-auto px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
-      <div className="flex flex-col md:flex-row gap-3 mb-4">
-        <div className="w-full md:w-1/4">
-          <FilterSelect
-            value={filter}
-            onChange={handleFilter}
-            options={["Open Tickets", "Closed Tickets"]}
-          />
-        </div>
-        <DateRangeFilter
-          onChange={(f, t) => {
-            setDateFrom(f);
-            setDateTo(t);
-            setPage(0);
-          }}
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <FilterSelect
+          value={filter}
+          onChange={handleFilter}
+          options={["Open Tickets", "Closed Tickets"]}
         />
-        <div className="w-full md:w-1/2">
-          <SearchInput
-            placeholder="Search tickets..."
-            onSearch={handleSearch}
-          />
-        </div>
+        <DateRangeFilter
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          onDateFromChange={setDateFrom}
+          onDateToChange={setDateTo}
+        />
+        <SearchInput
+          placeholder="Search tickets..."
+          onSearch={handleSearch}
+          defaultValue={search}
+        />
       </div>
 
       {error ? (
@@ -572,10 +622,63 @@ export default function AdminTickets() {
             page={page}
             pageCount={pageCount}
             totalCount={totalCount}
-            onPrevPage={() => setPage((p) => Math.max(0, p - 1))}
-            onNextPage={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+            onPrevPage={() => {
+              const next = Math.max(0, page - 1);
+              setPage(next);
+              localStorage.setItem("admin_ticket_page", String(next));
+            }}
+            onNextPage={() => {
+              const next = Math.min(pageCount - 1, page + 1);
+              setPage(next);
+              localStorage.setItem("admin_ticket_page", String(next));
+            }}
           />
         </div>
+      )}
+
+      {selectedCommentTicket && (
+        <Modal
+          header={
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-lpu-maroon/10 dark:bg-lpu-gold/10 flex items-center justify-center shrink-0">
+                <MessageCircle
+                  size={20}
+                  className="text-lpu-maroon dark:text-lpu-gold"
+                />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-gray-800 dark:text-zinc-100 truncate">
+                  User Feedback
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-zinc-400 font-medium">
+                  Ticket #{selectedCommentTicket.id}
+                </p>
+              </div>
+            </div>
+          }
+          className="max-w-md mx-4"
+        >
+          <div className="p-6">
+            <div className="relative">
+              <div className="absolute -left-1 top-0 bottom-0 w-1 bg-lpu-maroon/20 dark:bg-lpu-gold/30 rounded-full" />
+              <div className="pl-4">
+                <p className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300 italic">
+                  "{selectedCommentTicket.satisfaction_comment}"
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-end">
+              <TableButton
+                variant="secondary"
+                onClick={() => setSelectedCommentTicket(null)}
+                className="w-full sm:w-auto"
+              >
+                Close Feedback
+              </TableButton>
+            </div>
+          </div>
+        </Modal>
       )}
     </section>
   );
