@@ -7,9 +7,9 @@ import {
   Building2,
   Timer,
   LayoutList,
-  ArrowDown,
-  Minus,
-  Flame,
+  ClockArrowDown,
+  Clock,
+  ClockArrowUp,
   Tag,
   MapPin,
   UserSquare2,
@@ -627,19 +627,19 @@ function StackedDistributionBar({
 // ─── SLA section ──────────────────────────────────────────────────────────────
 const PRIORITY_META = {
   Low: {
-    icon: ArrowDown,
+    icon: ClockArrowDown,
     color: COLORS.slaLow,
     bg: "bg-green-50 dark:bg-green-950/30",
     text: "text-green-700 dark:text-green-400",
   },
   Medium: {
-    icon: Minus,
+    icon: Clock,
     color: COLORS.slaMedium,
     bg: "bg-yellow-50 dark:bg-yellow-950/30",
     text: "text-yellow-700 dark:text-yellow-400",
   },
   High: {
-    icon: Flame,
+    icon: ClockArrowUp,
     color: COLORS.slaHigh,
     bg: "bg-red-50 dark:bg-red-950/30",
     text: "text-red-700 dark:text-red-400",

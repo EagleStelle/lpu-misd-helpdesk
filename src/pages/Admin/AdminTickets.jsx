@@ -37,7 +37,7 @@ function getPrioritySelectClass(priority) {
     .trim()
     .toLowerCase();
   if (val === "high") return "border-lpu-red";
-  if (val === "medium") return "border-lpu-gold";
+  if (val === "med") return "border-lpu-gold";
   if (val === "low") return "border-green-800";
   return "";
 }
@@ -48,7 +48,7 @@ function getPriorityPillClass(priority) {
     .toLowerCase();
   if (val === "high")
     return "bg-lpu-red/10 border border-lpu-red/40 text-lpu-red dark:bg-lpu-red/15 dark:border-lpu-red/30 dark:text-red-400";
-  if (val === "medium")
+  if (val === "med")
     return "bg-lpu-gold/10 border border-lpu-gold/50 text-yellow-700 dark:bg-lpu-gold/10 dark:border-lpu-gold/30 dark:text-yellow-400";
   if (val === "low")
     return "bg-green-800/10 border border-green-800/30 text-green-800 dark:bg-green-900/20 dark:border-green-700/30 dark:text-green-400";
@@ -57,7 +57,7 @@ function getPriorityPillClass(priority) {
 
 const PRIORITY_OPTIONS = [
   { value: "High", label: "High" },
-  { value: "Medium", label: "Medium" },
+  { value: "Med", label: "Med" },
   { value: "Low", label: "Low" },
 ];
 
@@ -209,14 +209,14 @@ export default function AdminTickets() {
           setAdminNameMap(map);
         }
       })
-      .catch(() => { });
+      .catch(() => {});
 
     fetch(`${base}/api/admin/assignees`, { headers })
       .then((r) => r.json())
       .then((json) => {
         if (json.success) setAssignableAdmins(json.data);
       })
-      .catch(() => { });
+      .catch(() => {});
   }, [isLoggedIn, isAdmin]);
 
   // Main paginated fetch
@@ -265,7 +265,18 @@ export default function AdminTickets() {
     };
 
     fetchTickets();
-  }, [isLoggedIn, isAdmin, page, filter, search, dateFrom, dateTo, realtimeTick, showLoading, hideLoading]);
+  }, [
+    isLoggedIn,
+    isAdmin,
+    page,
+    filter,
+    search,
+    dateFrom,
+    dateTo,
+    realtimeTick,
+    showLoading,
+    hideLoading,
+  ]);
 
   // Realtime: refetch on any ticket change
   useEffect(() => {
@@ -369,31 +380,34 @@ export default function AdminTickets() {
     }
   };
 
-  const toggleTicketStatus = useCallback(async (ticket) => {
-    if (!isAdmin || !ticket) return;
-    try {
-      showLoading();
-      const shouldReopen = isClosed(ticket);
-      const payload = shouldReopen
-        ? { status: "Open", closed_at: null }
-        : { status: "Closed", closed_at: new Date().toISOString() };
+  const toggleTicketStatus = useCallback(
+    async (ticket) => {
+      if (!isAdmin || !ticket) return;
+      try {
+        showLoading();
+        const shouldReopen = isClosed(ticket);
+        const payload = shouldReopen
+          ? { status: "Open", closed_at: null }
+          : { status: "Closed", closed_at: new Date().toISOString() };
 
-      const { error } = await realtimeSupabase
-        .from("Tickets")
-        .update(payload)
-        .eq("id", ticket.id);
+        const { error } = await realtimeSupabase
+          .from("Tickets")
+          .update(payload)
+          .eq("id", ticket.id);
 
-      if (error) {
-        alert(error.message || "Failed to update ticket status");
-        return;
+        if (error) {
+          alert(error.message || "Failed to update ticket status");
+          return;
+        }
+        setRealtimeTick((n) => n + 1);
+      } catch (e) {
+        console.error("Unexpected error", e);
+      } finally {
+        hideLoading();
       }
-      setRealtimeTick((n) => n + 1);
-    } catch (e) {
-      console.error("Unexpected error", e);
-    } finally {
-      hideLoading();
-    }
-  }, [isAdmin, showLoading, hideLoading]);
+    },
+    [isAdmin, showLoading, hideLoading],
+  );
 
   const patchAssignees = useCallback(async (ticket, payload) => {
     const token = localStorage.getItem("authToken");
@@ -409,75 +423,89 @@ export default function AdminTickets() {
       },
     );
     const json = await res.json().catch(() => ({}));
-    if (!json.success) throw new Error(json.message || "Failed to update assignees");
+    if (!json.success)
+      throw new Error(json.message || "Failed to update assignees");
     return json.data;
   }, []);
 
-  const handleAddAssignee = useCallback(async (ticket, adminId) => {
-    const slots = ["Assignee1", "Assignee2", "Assignee3"];
-    const emptySlot = slots.find((s) => !ticket[s]);
-    if (!emptySlot) return;
-    const payload = {
-      Assignee1: ticket.Assignee1 || null,
-      Assignee2: ticket.Assignee2 || null,
-      Assignee3: ticket.Assignee3 || null,
-    };
-    payload[emptySlot] = adminId;
-    try {
-      const updated = await patchAssignees(ticket, payload);
-      setTickets((prev) =>
-        prev.map((t) => (t.id === ticket.id ? { ...t, ...(updated || payload) } : t)),
-      );
-    } catch (e) {
-      alert(e.message);
-    }
-  }, [patchAssignees]);
-
-  const handleRemoveAssignee = useCallback(async (ticket, adminId) => {
-    const slots = ["Assignee1", "Assignee2", "Assignee3"];
-    const slot = slots.find((s) => ticket[s] === adminId);
-    if (!slot) return;
-    const payload = {
-      Assignee1: ticket.Assignee1 || null,
-      Assignee2: ticket.Assignee2 || null,
-      Assignee3: ticket.Assignee3 || null,
-    };
-    payload[slot] = null;
-    try {
-      const updated = await patchAssignees(ticket, payload);
-      setTickets((prev) =>
-        prev.map((t) => (t.id === ticket.id ? { ...t, ...(updated || payload) } : t)),
-      );
-    } catch (e) {
-      alert(e.message);
-    }
-  }, [patchAssignees]);
-
-  const handlePriorityChange = useCallback(async (ticket, value) => {
-    if (!isAdmin || !ticket) return;
-    const nextPriority = value || null;
-    try {
-      const { error } = await realtimeSupabase
-        .from("Tickets")
-        .update({ Priority: nextPriority })
-        .eq("id", ticket.id);
-      if (error) {
-        alert(error.message || "Failed to update priority");
-        return;
+  const handleAddAssignee = useCallback(
+    async (ticket, adminId) => {
+      const slots = ["Assignee1", "Assignee2", "Assignee3"];
+      const emptySlot = slots.find((s) => !ticket[s]);
+      if (!emptySlot) return;
+      const payload = {
+        Assignee1: ticket.Assignee1 || null,
+        Assignee2: ticket.Assignee2 || null,
+        Assignee3: ticket.Assignee3 || null,
+      };
+      payload[emptySlot] = adminId;
+      try {
+        const updated = await patchAssignees(ticket, payload);
+        setTickets((prev) =>
+          prev.map((t) =>
+            t.id === ticket.id ? { ...t, ...(updated || payload) } : t,
+          ),
+        );
+      } catch (e) {
+        alert(e.message);
       }
-      setTickets((prev) =>
-        prev.map((t) =>
-          t.id === ticket.id ? { ...t, Priority: nextPriority } : t,
-        ),
-      );
-    } catch (e) {
-      console.error("Unexpected error:", e);
-    }
-  }, [isAdmin]);
+    },
+    [patchAssignees],
+  );
+
+  const handleRemoveAssignee = useCallback(
+    async (ticket, adminId) => {
+      const slots = ["Assignee1", "Assignee2", "Assignee3"];
+      const slot = slots.find((s) => ticket[s] === adminId);
+      if (!slot) return;
+      const payload = {
+        Assignee1: ticket.Assignee1 || null,
+        Assignee2: ticket.Assignee2 || null,
+        Assignee3: ticket.Assignee3 || null,
+      };
+      payload[slot] = null;
+      try {
+        const updated = await patchAssignees(ticket, payload);
+        setTickets((prev) =>
+          prev.map((t) =>
+            t.id === ticket.id ? { ...t, ...(updated || payload) } : t,
+          ),
+        );
+      } catch (e) {
+        alert(e.message);
+      }
+    },
+    [patchAssignees],
+  );
+
+  const handlePriorityChange = useCallback(
+    async (ticket, value) => {
+      if (!isAdmin || !ticket) return;
+      const nextPriority = value || null;
+      try {
+        const { error } = await realtimeSupabase
+          .from("Tickets")
+          .update({ Priority: nextPriority })
+          .eq("id", ticket.id);
+        if (error) {
+          alert(error.message || "Failed to update priority");
+          return;
+        }
+        setTickets((prev) =>
+          prev.map((t) =>
+            t.id === ticket.id ? { ...t, Priority: nextPriority } : t,
+          ),
+        );
+      } catch (e) {
+        console.error("Unexpected error:", e);
+      }
+    },
+    [isAdmin],
+  );
 
   const adminColumns = useMemo(
     () => [
-      { label: "Ticket No.", accessor: "id", variant: "badge" },
+      { label: "ID", accessor: "id", variant: "badge" },
       {
         label: "Priority",
         accessor: (row) => getTicketPriority(row),
@@ -493,10 +521,16 @@ export default function AdminTickets() {
         pillClassName: (row) => getPriorityPillClass(getTicketPriority(row)),
         getDisplayValue: (_row, value) => value || "Set priority…",
       },
-      { label: "Summary", accessor: "Summary", variant: "title" },
+      {
+        label: "Summary",
+        accessor: "Summary",
+        variant: "title",
+        colWidth: "w-36 md:w-48",
+      },
       {
         label: "Description",
         accessor: "Description",
+        colWidth: "w-56 md:w-80",
         render: (row) => (
           <div
             className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-1 italic py-1"
@@ -541,23 +575,13 @@ export default function AdminTickets() {
                 {isClosedStatus ? "Reopen" : "Close"}
               </TableButton>
               {row.satisfaction_comment && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedCommentTicket(row);
-                  }}
-                  className="flex items-center justify-center gap-1 w-full px-1.5 py-1.5 bg-lpu-gold/10 hover:bg-lpu-gold/20 dark:bg-lpu-gold/5 dark:hover:bg-lpu-gold/10 text-yellow-700 dark:text-lpu-gold rounded-lg border border-lpu-gold/30 dark:border-lpu-gold/20 transition-all group/feedback shadow-sm"
-                  title="View User Feedback"
+                <TableButton
+                  variant="secondary"
+                  onClick={() => setSelectedCommentTicket(row)}
+                  className="w-full"
                 >
-                  <MessageCircle
-                    size={12}
-                    className="shrink-0 animate-bounce group-hover/feedback:animate-none"
-                  />
-                  <span className="text-[10px] font-black uppercase tracking-normal">
-                    Feedback
-                  </span>
-                </button>
+                  Feedback
+                </TableButton>
               )}
             </div>
           );
@@ -588,23 +612,28 @@ export default function AdminTickets() {
 
   return (
     <section className="w-full max-w-330 mx-auto px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
-      <div className="flex flex-col md:flex-row gap-4 mb-4">
-        <FilterSelect
-          value={filter}
-          onChange={handleFilter}
-          options={["Open Tickets", "Closed Tickets"]}
-        />
+      <div className="flex flex-col md:flex-row gap-3 mb-4">
+        <div className="w-full md:w-1/4">
+          <FilterSelect
+            value={filter}
+            onChange={handleFilter}
+            options={["Open Tickets", "Closed Tickets"]}
+          />
+        </div>
         <DateRangeFilter
-          dateFrom={dateFrom}
-          dateTo={dateTo}
-          onDateFromChange={setDateFrom}
-          onDateToChange={setDateTo}
+          onChange={(f, t) => {
+            setDateFrom(f);
+            setDateTo(t);
+            setPage(0);
+          }}
         />
-        <SearchInput
-          placeholder="Search tickets..."
-          onSearch={handleSearch}
-          defaultValue={search}
-        />
+        <div className="w-full md:w-1/2">
+          <SearchInput
+            placeholder="Search tickets..."
+            onSearch={handleSearch}
+            defaultValue={search}
+          />
+        </div>
       </div>
 
       {error ? (

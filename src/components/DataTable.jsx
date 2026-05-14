@@ -310,23 +310,25 @@ export function DataTable({
   };
 
   return (
-    <div className="datatable-root w-full h-full rounded-xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-x-auto md:overflow-x-hidden flex flex-col">
-      <div className="min-w-325 md:min-w-full flex-1 min-h-0 flex flex-col">
-        {/* HEADER TABLE */}
-        <div className="w-full bg-lpu-maroon text-white rounded-t-xl pr-1 md:pr-2">
-          <table className="w-full text-left border-collapse table-fixed">
+    <div className="datatable-root w-full h-full rounded-xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm flex flex-col">
+      <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden rounded-t-xl flex flex-col">
+        <div className="min-w-325 md:min-w-full flex flex-col flex-1 min-h-0">
+          {/* Header — fixed, no scroll */}
+          <table className="w-full text-left border-collapse table-fixed md:table-auto shrink-0">
             <colgroup>
               {columns.map((col, index) => (
                 <col key={index} className={getColumnWidthClass(col)} />
               ))}
             </colgroup>
-            <thead>
+            <thead className="bg-lpu-maroon text-white">
               <tr>
                 {columns.map((col, index) => (
                   <th
                     key={index}
                     className={`px-3 py-4 md:px-4 font-bold uppercase text-[11px] tracking-widest ${
                       col.align === "right" ? "text-right" : "text-left"
+                    } ${index === 0 ? "rounded-tl-xl" : ""} ${
+                      index === columns.length - 1 ? "rounded-tr-xl" : ""
                     }`}
                   >
                     {col.label}
@@ -335,58 +337,56 @@ export function DataTable({
               </tr>
             </thead>
           </table>
+          {/* Body — vertical scroll only */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <table className="w-full text-left border-collapse table-fixed md:table-auto">
+              <colgroup>
+                {columns.map((col, index) => (
+                  <col key={index} className={getColumnWidthClass(col)} />
+                ))}
+              </colgroup>
+              <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                {data.map((row, rowIndex) => (
+                  <tr
+                    key={row.id || rowIndex}
+                    onClick={() => onRowClick && onRowClick(row)}
+                    tabIndex={onRowClick ? 0 : -1}
+                    style={{ animationDelay: `${rowIndex * 30}ms` }}
+                    className={`group transition-colors duration-200 animate-in fade-in slide-in-from-left-4 hover:bg-lpu-gold/10 dark:hover:bg-lpu-maroon/20 ${
+                      rowIndex % 2 === 0
+                        ? "bg-white dark:bg-zinc-900"
+                        : "bg-gray-50 dark:bg-[#1f1f23]"
+                    } ${onRowClick ? "cursor-pointer" : ""}`}
+                  >
+                    {columns.map((col, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className={`px-3 py-3 md:px-4 align-middle overflow-hidden ${
+                          col.align === "right" ? "text-right" : "text-left"
+                        }`}
+                        onClick={(e) => {
+                          if (col.preventRowClick) e.stopPropagation();
+                        }}
+                      >
+                        {renderCell(col, row, rowIndex)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-
-        {/* BODY TABLE */}
-        <div className="w-full flex-1 min-h-0 overflow-y-auto rounded-b-xl pb-2">
-          <table className="w-full text-left border-collapse table-fixed">
-            <colgroup>
-              {columns.map((col, index) => (
-                <col key={index} className={getColumnWidthClass(col)} />
-              ))}
-            </colgroup>
-            <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
-              {data.map((row, rowIndex) => (
-                <tr
-                  key={row.id || rowIndex}
-                  onClick={() => onRowClick && onRowClick(row)}
-                  tabIndex={onRowClick ? 0 : -1}
-                  style={{ animationDelay: `${rowIndex * 30}ms` }}
-                  className={`group transition-colors duration-200 animate-in fade-in slide-in-from-left-4 hover:bg-lpu-gold/10 dark:hover:bg-lpu-maroon/20 ${
-                    rowIndex % 2 === 0
-                      ? "bg-white dark:bg-zinc-900"
-                      : "bg-gray-50 dark:bg-[#1f1f23]"
-                  } ${onRowClick ? "cursor-pointer" : ""}`}
-                >
-                  {columns.map((col, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className={`px-3 py-3 md:px-4 align-middle overflow-hidden ${
-                        col.align === "right" ? "text-right" : "text-left"
-                      }`}
-                      onClick={(e) => {
-                        if (col.preventRowClick) e.stopPropagation();
-                      }}
-                    >
-                      {renderCell(col, row, rowIndex)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {hasPagination && (
-          <PaginationFooter
-            page={page}
-            pageCount={pageCount}
-            totalCount={totalCount}
-            onPrevPage={onPrevPage}
-            onNextPage={onNextPage}
-          />
-        )}
       </div>
+      {hasPagination && (
+        <PaginationFooter
+          page={page}
+          pageCount={pageCount}
+          totalCount={totalCount}
+          onPrevPage={onPrevPage}
+          onNextPage={onNextPage}
+        />
+      )}
     </div>
   );
 }
