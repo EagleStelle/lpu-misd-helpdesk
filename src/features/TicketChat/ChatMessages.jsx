@@ -46,6 +46,7 @@ export default function ChatMessages({
   scrollRef,
   nowMs,
   getAttachmentSrc,
+  isImageFile,
   onOpenAttachment,
   onDownloadAttachment,
   isImageFile,
@@ -91,20 +92,20 @@ export default function ChatMessages({
     const isOtherAdmin = adminView && isAdmin && !isOwn;
 
     // branding color logic
-    let bubbleClass = "bg-white text-gray-800 border-gray-100";
-    let labelColor = "text-gray-500";
+    let bubbleClass = "bg-white text-gray-800 border-gray-100 dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-700";
+    let labelColor = "text-gray-500 dark:text-zinc-400";
 
     if (isOwn) {
-      labelColor = "text-lpu-maroon";
-      bubbleClass = "bg-lpu-maroon text-white border-lpu-maroon";
+      labelColor = "text-lpu-maroon dark:text-lpu-gold";
+      bubbleClass = "bg-lpu-maroon text-white border-lpu-maroon dark:bg-lpu-maroon/90 dark:border-lpu-maroon";
     } else if (adminView && (isBot || isOtherAdmin)) {
       // admin side: bot and colleagues are lpu-red
-      labelColor = "text-lpu-red";
-      bubbleClass = "bg-lpu-red text-white border-lpu-red";
+      labelColor = "text-lpu-red dark:text-red-400";
+      bubbleClass = "bg-lpu-red text-white border-lpu-red dark:bg-lpu-red/90 dark:border-lpu-red";
     } else {
       // user side: bot/admins are standard white/gray (same as everyone else)
-      labelColor = "text-gray-500";
-      bubbleClass = "bg-white text-gray-800 border-gray-100";
+      labelColor = "text-gray-500 dark:text-zinc-400";
+      bubbleClass = "bg-white text-gray-800 border-gray-100 dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-700";
     }
 
     const displayName = isTranscript
@@ -152,7 +153,7 @@ export default function ChatMessages({
                   <button
                     key={idx}
                     onClick={() => onOpenAttachment(file)}
-                    className="h-20 w-32 rounded-lg overflow-hidden border border-gray-200 shadow-[8px_8px_16px_rgba(0,0,0,0.12)] hover:border-lpu-maroon transition-all"
+                    className="h-20 w-32 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 shadow-[8px_8px_16px_rgba(0,0,0,0.12)] hover:border-lpu-maroon dark:hover:border-lpu-gold transition-all"
                   >
                     <img
                       src={getAttachmentSrc(file)}
@@ -164,13 +165,13 @@ export default function ChatMessages({
                   <button
                     key={idx}
                     onClick={() => onDownloadAttachment(file)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 hover:border-lpu-maroon hover:bg-gray-100 shadow-[8px_8px_16px_rgba(0,0,0,0.08)] transition-all text-left"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 hover:border-lpu-maroon dark:hover:border-lpu-gold hover:bg-gray-100 dark:hover:bg-zinc-700 shadow-[8px_8px_16px_rgba(0,0,0,0.08)] transition-all text-left"
                   >
-                    <FileText size={16} className="text-gray-400 shrink-0" />
-                    <span className="text-xs text-gray-700 max-w-28 truncate">
+                    <FileText size={16} className="text-gray-400 dark:text-zinc-500 shrink-0" />
+                    <span className="text-xs text-gray-700 dark:text-zinc-300 max-w-28 truncate">
                       {file.name}
                     </span>
-                    <Download size={13} className="text-gray-400 shrink-0" />
+                    <Download size={13} className="text-gray-400 dark:text-zinc-500 shrink-0" />
                   </button>
                 ),
               )}
