@@ -302,7 +302,7 @@ export default function AdminActivity() {
   }, [isGlobal]);
 
   return (
-    <section className="w-full max-w-330 mx-auto px-6 py-4 md:py-6 font-poppins h-full overflow-hidden flex flex-col dark:text-gray-100">
+    <section className="w-full px-6 py-4 md:py-6 font-poppins h-full overflow-hidden flex flex-col dark:text-gray-100">
       <div className="flex flex-col md:flex-row gap-3 mb-4">
         <div className="w-full md:w-1/4">
           <FilterSelect

@@ -130,9 +130,11 @@ export function DataTable({
   onNextPage,
 }) {
   const hasPagination = pageCount !== undefined && pageCount > 0;
+  const headerRef = useRef(null);
   const bodyRef = useRef(null);
   const [scrollbarW, setScrollbarW] = useState(0);
 
+  // Measure vertical scrollbar width
   useEffect(() => {
     const el = bodyRef.current;
     if (!el) return;
@@ -142,6 +144,16 @@ export function DataTable({
     ro.observe(el);
     return () => ro.disconnect();
   }, [data.length > 0]);
+
+  // Sync header horizontal scroll with body
+  useEffect(() => {
+    const body = bodyRef.current;
+    const header = headerRef.current;
+    if (!body || !header) return;
+    const sync = () => { header.scrollLeft = body.scrollLeft; };
+    body.addEventListener("scroll", sync, { passive: true });
+    return () => body.removeEventListener("scroll", sync);
+  });
 
   if (data.length === 0) {
     return (
@@ -182,7 +194,7 @@ export function DataTable({
       case "title":
         return (
           <div
-            className="text-sm font-bold text-gray-800 dark:text-zinc-100 line-clamp-1"
+            className="text-sm font-bold text-gray-800 dark:text-zinc-100 truncate"
             title={value}
           >
             {value || "-"}
@@ -191,7 +203,7 @@ export function DataTable({
       case "subtitle":
         return (
           <div
-            className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-1 italic"
+            className="text-sm text-gray-500 dark:text-zinc-400 truncate italic"
             title={value}
           >
             {value || "-"}
@@ -199,7 +211,7 @@ export function DataTable({
         );
       case "highlight":
         return (
-          <span className="text-sm font-bold text-lpu-maroon dark:text-lpu-gold tracking-tighter line-clamp-1">
+          <span className="text-sm font-bold text-lpu-maroon dark:text-lpu-gold tracking-tighter truncate block">
             {value || "-"}
           </span>
         );
@@ -294,7 +306,7 @@ export function DataTable({
       }
       default:
         return (
-          <span className="text-sm text-gray-700 dark:text-zinc-200 line-clamp-1">
+          <span className="text-sm text-gray-700 dark:text-zinc-200 truncate block">
             {value || "-"}
           </span>
         );
@@ -304,89 +316,87 @@ export function DataTable({
   const getColumnWidthClass = (col) => {
     if (col.colWidth != null) return col.colWidth;
     switch (col.variant) {
-      case "badge":        return "w-20 md:w-auto";
-      case "title":        return "w-1/4 md:w-auto";
-      case "subtitle":     return "w-1/3 md:w-auto";
-      case "action":       return "w-24 md:w-auto";
-      case "select":       return "w-45 md:w-auto";
+      case "badge":        return "w-20";
+      case "title":        return "w-40";
+      case "subtitle":     return "w-48";
+      case "action":       return "w-24";
+      case "select":       return "w-45";
       case "date":
       case "highlight":
-      default:             return "w-24 md:w-auto";
+      default:             return "w-28";
     }
   };
 
   return (
-    <div className="datatable-root w-full h-full rounded-xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm flex flex-col md:overflow-x-hidden">
-      <div className="flex-1 min-h-0 overflow-x-auto md:overflow-x-hidden rounded-t-xl">
-        <div className="min-w-325 md:min-w-0 flex flex-col h-full">
-          {/* Header — no scroll */}
-          <table className="w-full text-left border-collapse table-fixed">
-            <colgroup>
+    <div className="datatable-root w-full h-full rounded-xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm flex flex-col">
+      {/* Header — overflow-x hidden, scrollLeft synced via JS */}
+      <div ref={headerRef} className="overflow-x-hidden rounded-t-xl shrink-0">
+        <table className="w-full min-w-325 text-left border-collapse table-fixed">
+          <colgroup>
+            {columns.map((col, index) => (
+              <col key={index} className={getColumnWidthClass(col)} />
+            ))}
+            {scrollbarW > 0 && <col style={{ width: scrollbarW }} />}
+          </colgroup>
+          <thead className="bg-lpu-maroon text-white">
+            <tr>
               {columns.map((col, index) => (
-                <col key={index} className={getColumnWidthClass(col)} />
+                <th
+                  key={index}
+                  className={`px-3 py-4 md:px-4 font-bold uppercase text-[11px] tracking-widest ${
+                    col.align === "right" ? "text-right" : "text-left"
+                  } ${index === 0 ? "rounded-tl-xl" : ""} ${
+                    index === columns.length - 1 && scrollbarW === 0 ? "rounded-tr-xl" : ""
+                  }`}
+                >
+                  {col.label}
+                </th>
               ))}
-              {scrollbarW > 0 && <col style={{ width: scrollbarW }} />}
-            </colgroup>
-            <thead className="bg-lpu-maroon text-white">
-              <tr>
-                {columns.map((col, index) => (
-                  <th
-                    key={index}
-                    className={`px-3 py-4 md:px-4 font-bold uppercase text-[11px] tracking-widest ${
+              {scrollbarW > 0 && (
+                <th style={{ width: scrollbarW, padding: 0 }} className="rounded-tr-xl bg-lpu-maroon" />
+              )}
+            </tr>
+          </thead>
+        </table>
+      </div>
+      {/* Body — vertical + horizontal scroll both here */}
+      <div ref={bodyRef} className="flex-1 min-h-0 overflow-x-auto overflow-y-auto pb-2">
+        <table className="w-full min-w-325 text-left border-collapse table-fixed">
+          <colgroup>
+            {columns.map((col, index) => (
+              <col key={index} className={getColumnWidthClass(col)} />
+            ))}
+          </colgroup>
+          <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+            {data.map((row, rowIndex) => (
+              <tr
+                key={row.id || rowIndex}
+                onClick={() => onRowClick && onRowClick(row)}
+                tabIndex={onRowClick ? 0 : -1}
+                style={{ animationDelay: `${rowIndex * 30}ms` }}
+                className={`group transition-colors duration-200 animate-in fade-in slide-in-from-left-4 hover:bg-lpu-gold/10 dark:hover:bg-lpu-maroon/20 ${
+                  rowIndex % 2 === 0
+                    ? "bg-white dark:bg-zinc-900"
+                    : "bg-gray-50 dark:bg-[#1f1f23]"
+                } ${onRowClick ? "cursor-pointer" : ""}`}
+              >
+                {columns.map((col, colIndex) => (
+                  <td
+                    key={colIndex}
+                    className={`px-3 py-3 md:px-4 align-middle overflow-hidden whitespace-nowrap ${
                       col.align === "right" ? "text-right" : "text-left"
-                    } ${index === 0 ? "rounded-tl-xl" : ""} ${
-                      index === columns.length - 1 && scrollbarW === 0 ? "rounded-tr-xl" : ""
                     }`}
+                    onClick={(e) => {
+                      if (col.preventRowClick) e.stopPropagation();
+                    }}
                   >
-                    {col.label}
-                  </th>
+                    {renderCell(col, row, rowIndex)}
+                  </td>
                 ))}
-                {scrollbarW > 0 && (
-                  <th style={{ width: scrollbarW, padding: 0 }} className="rounded-tr-xl" />
-                )}
               </tr>
-            </thead>
-          </table>
-          {/* Body — scrollbar here only */}
-          <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pb-2">
-            <table className="w-full text-left border-collapse table-fixed">
-              <colgroup>
-                {columns.map((col, index) => (
-                  <col key={index} className={getColumnWidthClass(col)} />
-                ))}
-              </colgroup>
-              <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
-                {data.map((row, rowIndex) => (
-                  <tr
-                    key={row.id || rowIndex}
-                    onClick={() => onRowClick && onRowClick(row)}
-                    tabIndex={onRowClick ? 0 : -1}
-                    style={{ animationDelay: `${rowIndex * 30}ms` }}
-                    className={`group transition-colors duration-200 animate-in fade-in slide-in-from-left-4 hover:bg-lpu-gold/10 dark:hover:bg-lpu-maroon/20 ${
-                      rowIndex % 2 === 0
-                        ? "bg-white dark:bg-zinc-900"
-                        : "bg-gray-50 dark:bg-[#1f1f23]"
-                    } ${onRowClick ? "cursor-pointer" : ""}`}
-                  >
-                    {columns.map((col, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className={`px-3 py-3 md:px-4 align-middle overflow-hidden ${
-                          col.align === "right" ? "text-right" : "text-left"
-                        }`}
-                        onClick={(e) => {
-                          if (col.preventRowClick) e.stopPropagation();
-                        }}
-                      >
-                        {renderCell(col, row, rowIndex)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
       {hasPagination && (
         <PaginationFooter

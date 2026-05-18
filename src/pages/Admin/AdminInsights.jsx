@@ -904,7 +904,7 @@ export default function AdminAIAnalytics() {
     0;
 
   return (
-    <section className="w-full max-w-330 mx-auto px-6 py-4 md:py-6 font-poppins dark:text-gray-100">
+    <section className="w-full px-6 py-4 md:py-6 font-poppins dark:text-gray-100">
       <div className="flex flex-col gap-4">
         {/* ── Run Analysis ── */}
         <div className="flex flex-col gap-3">

@@ -258,8 +258,7 @@ export default function AdminKnowledge() {
 
   return (
     <div className="w-full h-full flex flex-col flex-1 overflow-hidden dark:text-gray-100">
-      {/* Retained max-width, flex-1 ensures it fills vertical space */}
-      <section className="w-full max-w-330 mx-auto flex flex-col flex-1 h-full px-4 py-4 md:px-6 md:py-6 font-poppins min-h-0">
+      <section className="w-full flex flex-col flex-1 h-full px-4 py-4 md:px-6 md:py-6 font-poppins min-h-0">
         {/* Search bar */}
         <div className="flex flex-col md:flex-row gap-4 mb-4 shrink-0">
           <SearchInput

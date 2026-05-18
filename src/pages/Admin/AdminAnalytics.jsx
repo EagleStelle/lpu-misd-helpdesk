@@ -1304,7 +1304,7 @@ export default function AdminAnalytics() {
   if (!isAdmin) return <Navigate to="/Tickets" replace />;
 
   return (
-    <section className="w-full max-w-330 mx-auto px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
+    <section className="w-full px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
       {error ? (
         <div className="mt-4 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-900">
           {error}

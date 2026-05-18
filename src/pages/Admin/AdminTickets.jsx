@@ -505,7 +505,12 @@ export default function AdminTickets() {
 
   const adminColumns = useMemo(
     () => [
-      { label: "ID", accessor: "id", variant: "badge" },
+      {
+        label: "ID",
+        accessor: "id",
+        variant: "badge",
+        colWidth: "w-20",
+      },
       {
         label: "Priority",
         accessor: (row) => getTicketPriority(row),
@@ -525,12 +530,12 @@ export default function AdminTickets() {
         label: "Summary",
         accessor: "Summary",
         variant: "title",
-        colWidth: "w-36 md:w-[8%]",
+        colWidth: "w-44",
       },
       {
         label: "Description",
         accessor: "Description",
-        colWidth: "w-56 md:w-[15%]",
+        colWidth: "w-64",
         render: (row) => (
           <div
             className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-1 italic py-1"
@@ -542,7 +547,7 @@ export default function AdminTickets() {
       },
       {
         label: "Assignees",
-        colWidth: "w-45 md:w-55",
+        colWidth: "w-45",
         preventRowClick: true,
         render: (row) => (
           <AssigneeCell
@@ -569,7 +574,7 @@ export default function AdminTickets() {
       { label: "Created", accessor: "created_at", variant: "date" },
       {
         label: "Actions",
-        colWidth: "w-28 md:w-32",
+        colWidth: "w-28",
         preventRowClick: true,
         render: (row) => {
           const isClosedStatus = isClosed(row);
@@ -619,7 +624,7 @@ export default function AdminTickets() {
   if (!isAdmin) return <Navigate to="/Tickets" replace />;
 
   return (
-    <section className="w-full max-w-330 mx-auto px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
+    <section className="w-full px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
       <div className="flex flex-col md:flex-row gap-3 mb-4">
         <div className="w-full md:w-1/4">
           <FilterSelect
@@ -635,7 +640,7 @@ export default function AdminTickets() {
             setPage(0);
           }}
         />
-        <div className="w-full md:w-1/2">
+        <div className="flex-1 min-w-0">
           <SearchInput
             placeholder="Search tickets..."
             onSearch={handleSearch}
@@ -649,7 +654,7 @@ export default function AdminTickets() {
           {error}
         </div>
       ) : (
-        <div className="w-full flex-1 min-h-0 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900 flex flex-col">
+        <div className="w-full flex-1 min-h-0 flex flex-col">
           <DataTable
             columns={adminColumns}
             data={tickets}

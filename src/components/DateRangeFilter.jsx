@@ -110,10 +110,10 @@ export function DateRangeFilter({ onChange, className = "" }) {
 
   return (
     <div
-      className={`flex flex-col sm:flex-row sm:items-center gap-2 ${className}`}
+      className={`flex flex-row items-center gap-2 ${className}`}
     >
       {/* Segmented preset control */}
-      <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5 cursor-alias">
+      <div className="shrink-0 flex rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5 cursor-alias">
         <button
           type="button"
           onClick={clearAll}
@@ -136,30 +136,21 @@ export function DateRangeFilter({ onChange, className = "" }) {
                 : "text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-zinc-200 hover:bg-white/70 dark:hover:bg-zinc-700/60"
             }`}
           >
-            {p.key === "custom" ? (
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-3 h-3" />
-                Custom
-              </span>
-            ) : (
-              p.label
-            )}
+            {p.label}
           </button>
         ))}
       </div>
 
-      {/* Custom date range pickers */}
+      {/* Custom date range pickers — fills remaining space */}
       {active === "custom" && (
-        <div className="flex items-center gap-1.5">
+        <div className="flex-1 flex items-center gap-1.5 min-w-0">
           <DatePill
             value={from}
-            placeholder="From date"
+            placeholder="From"
             onChange={handleFrom}
           />
-          <span className="text-xs font-medium text-gray-300 dark:text-zinc-600">
-            —
-          </span>
-          <DatePill value={to} placeholder="To date" onChange={handleTo} />
+          <span className="text-xs font-medium text-gray-300 dark:text-zinc-600 shrink-0">—</span>
+          <DatePill value={to} placeholder="To" onChange={handleTo} />
         </div>
       )}
     </div>
