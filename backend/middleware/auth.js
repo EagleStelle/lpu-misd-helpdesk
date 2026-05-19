@@ -1,4 +1,4 @@
-import { verifyToken } from "../services/authService.js";
+import { verifyToken, checkAdminActive } from "../services/authService.js";
 
 /**
  * Middleware to verify JWT token
@@ -28,20 +28,28 @@ export const authMiddleware = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
+        console.error("Authentication error:", error);
         return res.status(500).json({
             success: false,
             message: "Authentication error",
-            error: error.message,
         });
     }
 };
 
 /**
  * Middleware to verify JWT token AND require admin role.
+ * Also verifies the admin account is still active in the database to support revocation.
  */
 export const adminMiddleware = (req, res, next) => {
-    authMiddleware(req, res, () => {
+    authMiddleware(req, res, async () => {
         if (req.user?.app_role !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required",
+            });
+        }
+        const isActive = await checkAdminActive(req.user.id || req.user.sub);
+        if (!isActive) {
             return res.status(403).json({
                 success: false,
                 message: "Admin access required",

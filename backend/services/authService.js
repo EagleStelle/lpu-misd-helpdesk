@@ -111,6 +111,20 @@ export const verifyAdminEmailFromToken = async (token) => {
 };
 
 /**
+ * Check that an admin account still exists and is active in the database.
+ * Called on every admin request to prevent deactivated accounts from using valid tokens.
+ */
+export const checkAdminActive = async (adminId) => {
+    const { data, error } = await supabase
+        .from("admin_users")
+        .select("is_active")
+        .eq("id", adminId)
+        .single();
+    if (error || !data) return false;
+    return data.is_active === true;
+};
+
+/**
  * Verify JWT token
  */
 export const verifyToken = (token) => {

@@ -592,8 +592,8 @@ router.get("/status", adminMiddleware, async (req, res) => {
 
     res.json({ success: true, totalClosed: totalClosed || 0, lastRun: lastRun || null });
   } catch (err) {
-    console.error("[AI Analytics] Status error:", err.message);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("[AI Analytics] Status error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -612,8 +612,8 @@ router.get("/results", adminMiddleware, async (req, res) => {
     if (error) throw error;
     res.json({ success: true, data: data || null });
   } catch (err) {
-    console.error("[AI Analytics] Results error:", err.message);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("[AI Analytics] Results error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -642,7 +642,8 @@ router.get("/check", adminMiddleware, async (req, res) => {
     ]);
     res.json({ success: true, analyzed: !!data, ticketCount: ticketCount || 0 });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("[AI Analytics] Check error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -739,8 +740,8 @@ router.post("/analyze", adminMiddleware, async (req, res) => {
 
     res.json({ success: true, jobId });
   } catch (err) {
-    console.error("[AI Analytics] Analyze error:", err.message);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("[AI Analytics] Analyze error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -794,8 +795,8 @@ router.post("/add-knowledge", adminMiddleware, async (req, res) => {
 
     res.json({ success: true, data });
   } catch (err) {
-    console.error("[AI Analytics] Add KB error:", err.message);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("[AI Analytics] Add KB error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 

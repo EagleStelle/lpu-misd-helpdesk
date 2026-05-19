@@ -43,10 +43,10 @@ router.post("/signup", async (req, res) => {
 
         return res.status(201).json(result);
     } catch (error) {
+        console.error("Signup error:", error);
         return res.status(500).json({
             success: false,
             message: "Signup error",
-            error: error.message,
         });
     }
 });
@@ -75,10 +75,10 @@ router.post("/login", async (req, res) => {
 
         return res.status(200).json(result);
     } catch (error) {
+        console.error("Login error:", error);
         return res.status(500).json({
             success: false,
             message: "Login error",
-            error: error.message,
         });
     }
 });
@@ -106,10 +106,10 @@ router.post("/admin-login", async (req, res) => {
 
         return res.status(200).json(result);
     } catch (error) {
+        console.error("Admin login error:", error);
         return res.status(500).json({
             success: false,
             message: "Admin login error",
-            error: error.message,
         });
     }
 });
@@ -130,10 +130,10 @@ router.get("/me", authMiddleware, async (req, res) => {
 
         return res.status(200).json(result);
     } catch (error) {
+        console.error("Error fetching user:", error);
         return res.status(500).json({
             success: false,
             message: "Error fetching user",
-            error: error.message,
         });
     }
 });
@@ -182,10 +182,10 @@ router.put("/me", authMiddleware, async (req, res) => {
             token,
         });
     } catch (error) {
+        console.error("Error updating profile:", error);
         return res.status(500).json({
             success: false,
             message: "Error updating profile",
-            error: error.message,
         });
     }
 });
@@ -226,10 +226,10 @@ router.post("/change-password", authMiddleware, async (req, res) => {
 
         return res.status(200).json(result);
     } catch (error) {
+        console.error("Error changing password:", error);
         return res.status(500).json({
             success: false,
             message: "Error changing password",
-            error: error.message,
         });
     }
 });
@@ -258,10 +258,10 @@ router.post("/magic-verify", async (req, res) => {
 
         return res.status(200).json(result);
     } catch (error) {
+        console.error("Magic link verification error:", error);
         return res.status(500).json({
             success: false,
             message: "Magic link verification error",
-            error: error.message,
         });
     }
 });

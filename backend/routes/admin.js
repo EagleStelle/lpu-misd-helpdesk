@@ -45,10 +45,10 @@ router.get("/users", globalAdminMiddleware, async (req, res) => {
             },
         });
     } catch (error) {
+        console.error("Error fetching users:", error);
         return res.status(500).json({
             success: false,
             message: "Error fetching users",
-            error: error.message,
         });
     }
 });
@@ -67,10 +67,10 @@ router.get("/users/:userId", globalAdminMiddleware, async (req, res) => {
 
         return res.status(200).json(result);
     } catch (error) {
+        console.error("Error fetching user:", error);
         return res.status(500).json({
             success: false,
             message: "Error fetching user",
-            error: error.message,
         });
     }
 });
@@ -99,10 +99,10 @@ router.put("/users/:userId", globalAdminMiddleware, async (req, res) => {
             user: result.user,
         });
     } catch (error) {
+        console.error("Error updating user:", error);
         return res.status(500).json({
             success: false,
             message: "Error updating user",
-            error: error.message,
         });
     }
 });
@@ -128,10 +128,10 @@ router.delete("/users/:userId", globalAdminMiddleware, async (req, res) => {
 
         return res.status(200).json(result);
     } catch (error) {
+        console.error("Error deleting user:", error);
         return res.status(500).json({
             success: false,
             message: "Error deleting user",
-            error: error.message,
         });
     }
 });
@@ -165,10 +165,10 @@ router.get("/stats", globalAdminMiddleware, async (req, res) => {
             },
         });
     } catch (error) {
+        console.error("Error fetching stats:", error);
         return res.status(500).json({
             success: false,
             message: "Error fetching stats",
-            error: error.message,
         });
     }
 });

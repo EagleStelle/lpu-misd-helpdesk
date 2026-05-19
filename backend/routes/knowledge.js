@@ -56,8 +56,10 @@ router.get("/", adminMiddleware, async (req, res) => {
     .order("id", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error)
-    return res.status(500).json({ success: false, error: error.message });
+  if (error) {
+    console.error("Knowledge fetch error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
   res.json({ success: true, data, total: count });
 });
 
@@ -97,11 +99,8 @@ router.post("/", adminMiddleware, async (req, res) => {
   }
 
   if (inserted.length === 0) {
-    console.error(
-      "[Knowledge API Fatal]: All chunks failed:",
-      errors.join("; "),
-    ); // Print final failure
-    return res.status(500).json({ success: false, error: errors.join("; ") });
+    console.error("[Knowledge API Fatal]: All chunks failed:", errors.join("; "));
+    return res.status(500).json({ success: false, message: "Failed to add knowledge entry" });
   }
 
   const adminId = req.user?.id || req.user?.sub;
@@ -140,7 +139,7 @@ router.put("/:id", adminMiddleware, async (req, res) => {
     .single();
 
   if (fetchError)
-    return res.status(404).json({ success: false, error: fetchError.message });
+    return res.status(404).json({ success: false, message: "Entry not found" });
 
   try {
     const embedding = await embedText(trimmedText);
@@ -157,8 +156,10 @@ router.put("/:id", adminMiddleware, async (req, res) => {
       .select("id, content, metadata")
       .single();
 
-    if (error)
-      return res.status(500).json({ success: false, error: error.message });
+    if (error) {
+      console.error("Knowledge update error:", error);
+      return res.status(500).json({ success: false, message: "Internal server error" });
+    }
 
     const adminId = req.user?.id || req.user?.sub;
     const editLabel = deriveLabel(resolvedTitle, trimmedText);
@@ -172,8 +173,8 @@ router.put("/:id", adminMiddleware, async (req, res) => {
 
     return res.json({ success: true, data });
   } catch (err) {
-    console.error("[Knowledge API Update Error]:", err.message);
-    return res.status(500).json({ success: false, error: err.message });
+    console.error("[Knowledge API Update Error]:", err);
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -188,8 +189,10 @@ router.delete("/:id", adminMiddleware, async (req, res) => {
     .single();
 
   const { error } = await supabase.from("knowledge_base").delete().eq("id", id);
-  if (error)
-    return res.status(500).json({ success: false, error: error.message });
+  if (error) {
+    console.error("Knowledge delete error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
 
   const adminId = req.user?.id || req.user?.sub;
   const delLabel = deriveLabel(existing?.metadata?.title, existing?.content);
@@ -215,8 +218,10 @@ router.delete("/bulk/by-title", adminMiddleware, async (req, res) => {
     .delete()
     .eq("metadata->>title", title);
 
-  if (error)
-    return res.status(500).json({ success: false, error: error.message });
+  if (error) {
+    console.error("Knowledge bulk delete error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
 
   const adminId = req.user?.id || req.user?.sub;
   logActivity({

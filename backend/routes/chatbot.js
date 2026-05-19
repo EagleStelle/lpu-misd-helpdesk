@@ -46,10 +46,8 @@ router.post("/message", optionalAuthMiddleware, async (req, res) => {
     const result = await sendChatMessage(message, sessionId, userId, Array.isArray(history) ? history : []);
     res.json({ success: true, ...result });
   } catch (err) {
-    console.error("[Chatbot] message error:", err.message);
-    res
-      .status(500)
-      .json({ success: false, error: err.message, detail: err.stack });
+    console.error("[Chatbot] message error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -66,8 +64,8 @@ router.post("/handoff", optionalAuthMiddleware, async (req, res) => {
     await markSessionTransferred(sessionId);
     res.json({ success: true });
   } catch (err) {
-    console.error("[Chatbot] handoff error:", err.message);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("[Chatbot] handoff error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -77,7 +75,8 @@ router.get("/session/:sessionId", optionalAuthMiddleware, async (req, res) => {
     const session = await getSession(req.params.sessionId);
     res.json({ success: true, session });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("[Chatbot] session error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
