@@ -262,35 +262,33 @@ export default function AdminManage() {
   ];
 
   return (
-    <div className="md:flex-1 md:overflow-y-auto dark:text-gray-100">
-      <section className="w-full px-6 py-4 md:py-6 font-poppins h-full overflow-hidden flex flex-col">
-        <div className="mb-4">
-          <SearchInput
-            placeholder="Search by name or email..."
-            onSearch={handleSearch}
+    <section className="w-full px-6 py-4 md:py-6 font-poppins h-full overflow-hidden flex flex-col dark:text-gray-100">
+      <div className="mb-4">
+        <SearchInput
+          placeholder="Search by name or email..."
+          onSearch={handleSearch}
+        />
+      </div>
+
+      {error ? (
+        <div className="bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 p-4 rounded-xl font-semibold text-center border border-red-100 dark:border-red-900/30">
+          {error}
+        </div>
+      ) : (
+        <div className="w-full flex-1 min-h-0 flex flex-col">
+          <DataTable
+            columns={columns}
+            data={pagedAdmins}
+            emptyMessage="No admin accounts found."
+            emptySubMessage="Adjust your search terms."
+            page={page}
+            pageCount={pageCount}
+            totalCount={filteredAdmins.length}
+            onPrevPage={() => setPage((p) => Math.max(0, p - 1))}
+            onNextPage={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
           />
         </div>
-
-        {error ? (
-          <div className="bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 p-4 rounded-xl font-semibold text-center border border-red-100 dark:border-red-900/30">
-            {error}
-          </div>
-        ) : (
-          <div className="w-full rounded-xl border border-gray-100 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900">
-            <DataTable
-              columns={columns}
-              data={pagedAdmins}
-              emptyMessage="No admin accounts found."
-              emptySubMessage="Adjust your search terms."
-              page={page}
-              pageCount={pageCount}
-              totalCount={filteredAdmins.length}
-              onPrevPage={() => setPage((p) => Math.max(0, p - 1))}
-              onNextPage={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-            />
-          </div>
-        )}
-      </section>
+      )}
 
       {showAddModal && (
         <AddAdminModal
@@ -317,7 +315,7 @@ export default function AdminManage() {
           }}
         />
       )}
-    </div>
+    </section>
   );
 }
 

@@ -162,8 +162,8 @@ function CardHeader({ icon: Icon, title, aside }) {
   return (
     <div className="flex items-center justify-between px-5 pt-3 pb-2.5 border-b border-gray-100 dark:border-white/5">
       <div className="flex items-center gap-2">
-        <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-lpu-maroon/8 dark:bg-lpu-maroon/15">
-          <Icon className="w-3.5 h-3.5 text-lpu-maroon" strokeWidth={2} />
+        <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-lpu-maroon/8 dark:bg-lpu-gold/20">
+          <Icon className="w-3.5 h-3.5 text-lpu-maroon dark:text-lpu-gold" strokeWidth={2} />
         </span>
         <h3 className="text-sm font-bold tracking-tight text-gray-900 dark:text-zinc-100">
           {title}
@@ -268,7 +268,7 @@ function MultiRingDonutChart({
   const anySelected = selectedStatuses.size > 0;
 
   return (
-    <div className="flex flex-row items-center gap-4">
+    <div className="flex flex-col sm:flex-row items-center gap-4">
       <svg width="210" height="210" viewBox="0 0 260 260" className="shrink-0">
         <g transform="rotate(-90, 130, 130)">
           <circle
@@ -353,7 +353,9 @@ function MultiRingDonutChart({
           x={cx}
           y={cy - 4}
           textAnchor="middle"
-          fontSize={String(total).length <= 4 ? 30 : String(total).length <= 6 ? 24 : 18}
+          fontSize={
+            String(total).length <= 4 ? 30 : String(total).length <= 6 ? 24 : 18
+          }
           fontWeight="700"
           fill="#111111"
           className="dark:fill-zinc-100"
@@ -372,7 +374,7 @@ function MultiRingDonutChart({
         </text>
       </svg>
 
-      <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+      <div className="flex flex-col gap-1.5 flex-1 min-w-0 w-full sm:w-auto">
         {legendItems.map(({ key, color, label, count }) => (
           <button
             key={key}
@@ -511,7 +513,7 @@ function VerticalBarGraph({
               </div>
 
               <span
-                className={`shrink-0 text-[10px] font-semibold uppercase tracking-wide text-center transition-colors duration-150 ${isSelected ? "text-lpu-maroon" : "text-gray-400 dark:text-zinc-500"}`}
+                className={`shrink-0 text-[10px] font-semibold uppercase tracking-wide text-center transition-colors duration-150 ${isSelected ? "text-lpu-maroon dark:text-lpu-gold" : "text-gray-400 dark:text-zinc-500"}`}
               >
                 {item.department}
               </span>
@@ -589,8 +591,8 @@ function StackedDistributionBar({
         </span>
       </div>
 
-      {/* Segment labels — absolutely positioned at each segment's midpoint */}
-      <div className="relative h-6 mb-2.5">
+      {/* Segment labels — flex-wrap on mobile, absolutely positioned on desktop */}
+      <div className="flex flex-wrap gap-x-2 gap-y-0.5 mb-2">
         {segments.map((seg) => {
           if (seg.value === 0) return null;
           const isSelected = selectedValues.has(seg.label);
@@ -600,14 +602,13 @@ function StackedDistributionBar({
               key={seg.label}
               type="button"
               onClick={() => onSegmentClick?.(seg.label)}
-              className={`absolute flex items-center gap-1 text-xs cursor-pointer transition-colors duration-150 whitespace-nowrap -translate-x-1/2 top-0 ${
+              className={`flex items-center gap-1 text-xs cursor-pointer transition-colors duration-150 whitespace-nowrap ${
                 anySelected && !isSelected
                   ? "opacity-40 text-gray-500 dark:text-zinc-400"
                   : isSelected
                     ? "text-lpu-maroon dark:text-lpu-gold"
                     : "text-gray-500 dark:text-zinc-400 hover:text-lpu-red dark:hover:text-lpu-red"
               }`}
-              style={{ left: `${seg.midpoint}%` }}
             >
               <span
                 className="w-2 h-2 rounded-full shrink-0"
@@ -719,7 +720,7 @@ function SlaSection({
             No SLA data available
           </p>
         ) : (
-          <div className="divide-y divide-gray-100 dark:divide-white/5">
+          <div className="flex flex-col gap-3">
             {sortedAdmins.map((adminEntry) => {
               const isCurrentUser = adminEntry.adminId === currentUserId;
               const isSelected = selectedAdminIds.has(adminEntry.adminId);
@@ -763,7 +764,7 @@ function SlaSection({
                       {adminEntry.adminName || "Unknown Admin"}
                     </span>
                     {isCurrentUser && (
-                      <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-lpu-maroon/10 text-lpu-maroon shrink-0">
+                      <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-lpu-maroon/10 dark:bg-lpu-gold/20 text-lpu-maroon dark:text-lpu-gold shrink-0">
                         You
                       </span>
                     )}
@@ -1357,37 +1358,39 @@ export default function AdminAnalytics() {
   if (!isAdmin) return <Navigate to="/Tickets" replace />;
 
   return (
-    <section className="w-full px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
+    <section className="w-full px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] flex flex-col dark:text-gray-100 md:h-full md:overflow-hidden">
       {error ? (
         <div className="mt-4 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-900">
           {error}
         </div>
       ) : (
-        <div className="flex flex-col gap-4 md:flex-1 md:min-h-0">
+        <div className="flex flex-col gap-4 md:flex-1 md:min-h-0 pb-4 md:pb-0">
           {/* ── Toolbar ── */}
-          <div className="flex flex-wrap items-center justify-between gap-2 shrink-0">
-            {/* Left: active filter chips */}
-            <div className="flex flex-wrap gap-2 items-center min-h-9">
-              {activeFilters.map((f) => (
-                <button
-                  key={f.key}
-                  type="button"
-                  onClick={f.clear}
-                  className="flex items-center gap-1.5 px-3 h-9 text-xs font-semibold text-white bg-lpu-maroon rounded-xl hover:bg-lpu-red transition-colors duration-150 whitespace-nowrap"
-                >
-                  <X className="w-3 h-3" strokeWidth={2.5} />
-                  {f.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Right: date range filter */}
+          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 shrink-0 bg-slate-50 dark:bg-[#09090b] -mx-6 px-6 py-2 md:relative md:top-auto md:z-auto md:bg-transparent md:mx-0 md:px-0 md:py-0">
+            {/* Left: date range filter */}
             <DateRangeFilter
               onChange={(f, t) => {
                 setFromDate(f);
                 setToDate(t);
               }}
             />
+
+            {/* Right: active filter chips — only rendered when filters are active */}
+            {activeFilters.length > 0 && (
+              <div className="flex flex-wrap gap-2 items-center">
+                {activeFilters.map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={f.clear}
+                    className="flex items-center gap-1.5 px-3 h-9 text-xs font-semibold text-white bg-lpu-maroon rounded-xl hover:bg-lpu-red transition-colors duration-150 whitespace-nowrap"
+                  >
+                    <X className="w-3 h-3" strokeWidth={2.5} />
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ── 2-column layout ── */}
@@ -1426,7 +1429,7 @@ export default function AdminAnalytics() {
             <div className="flex-1 min-h-0 flex flex-col gap-2">
               <Card className="md:flex-1 md:min-h-0 flex flex-col">
                 <CardHeader icon={Building2} title="Tickets by Department" />
-                <div className="h-150 md:h-auto md:flex-1 min-h-0 flex flex-col px-4 py-3">
+                <div className="h-96 md:h-auto md:flex-1 min-h-0 flex flex-col px-4 py-3">
                   <VerticalBarGraph
                     chartData={departmentChartData}
                     selectedDepts={selectedDepts}

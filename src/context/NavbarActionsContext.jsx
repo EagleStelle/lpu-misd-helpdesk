@@ -58,7 +58,7 @@ export function NavbarActionButton({ icon: Icon, label, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center justify-center gap-2 px-3 md:px-2 lg:px-3 h-8 rounded-lg text-sm font-medium text-white/85 hover:bg-lpu-gold hover:text-lpu-maroon transition-all duration-200"
+      className="flex items-center justify-center gap-2 px-3 md:px-2 lg:px-3 h-8 rounded-lg text-sm font-medium text-white/85 hover:bg-lpu-gold hover:text-lpu-maroon transition-all duration-200 cursor-pointer"
     >
       {Icon && <Icon size={16} />}
       <span className="hidden lg:inline">{label}</span>

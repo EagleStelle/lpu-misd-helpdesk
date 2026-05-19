@@ -30,10 +30,11 @@ const AdminDropdown = ({
     <button
       type="button"
       onClick={() => setMenuOpen((v) => !v)}
-      className={`flex items-center justify-center lg:justify-start gap-2 px-3 md:px-2 lg:px-3 h-8 rounded-lg text-sm font-medium transition-all duration-200 ${menuOpen
-        ? "bg-lpu-red text-white shadow-sm font-bold"
-        : "text-white/85 hover:bg-lpu-gold hover:text-lpu-maroon"
-        }`}
+      className={`flex items-center justify-center lg:justify-start gap-2 px-3 md:px-2 lg:px-3 h-8 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
+        menuOpen
+          ? "bg-lpu-red text-white shadow-sm font-bold"
+          : "text-white/85 hover:bg-lpu-gold hover:text-lpu-maroon"
+      }`}
     >
       <User size={16} />
       {/* Hide text on iPad (md), show on desktop (lg) */}
@@ -54,7 +55,7 @@ const AdminDropdown = ({
             setAccountModalOpen(true);
             setIsMobileMenuOpen(false);
           }}
-          className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-lpu-maroon dark:hover:text-lpu-gold transition-colors w-full text-left"
+          className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-lpu-maroon dark:hover:text-lpu-gold transition-colors w-full text-left cursor-pointer"
         >
           <Settings size={16} /> <span>Settings</span>
         </button>
@@ -64,7 +65,7 @@ const AdminDropdown = ({
         <button
           type="button"
           onClick={onLogout}
-          className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors w-full text-left"
+          className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors w-full text-left cursor-pointer"
         >
           <LogOut size={16} /> <span>Logout</span>
         </button>
@@ -77,22 +78,26 @@ const AdminDropdown = ({
 const AnalyticsDropdown = ({ open, setOpen, innerRef, onMobileClose }) => {
   const location = useLocation();
   const isActive =
-    location.pathname === "/admin/analytics" || location.pathname === "/admin/insights";
+    location.pathname === "/admin/analytics" ||
+    location.pathname === "/admin/insights";
 
   const linkBase =
-    "flex items-center gap-2.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors w-full text-left";
-  const linkInactive = "text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-lpu-maroon dark:hover:text-lpu-gold";
-  const linkActive = "text-lpu-maroon dark:text-lpu-gold bg-lpu-maroon/5 dark:bg-lpu-maroon/20 font-semibold";
+    "flex items-center gap-2.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors w-full text-left cursor-pointer";
+  const linkInactive =
+    "text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-lpu-maroon dark:hover:text-lpu-gold";
+  const linkActive =
+    "text-lpu-maroon dark:text-lpu-gold bg-lpu-maroon/5 dark:bg-lpu-maroon/20 font-semibold";
 
   return (
     <div className="relative flex items-center h-8" ref={innerRef}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex items-center justify-center lg:justify-start gap-2 px-3 md:px-2 lg:px-3 h-8 rounded-lg text-sm font-medium transition-all duration-200 ${isActive || open
+        className={`flex items-center justify-center lg:justify-start gap-2 px-3 md:px-2 lg:px-3 h-8 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
+          isActive || open
             ? "bg-lpu-red text-white shadow-sm font-bold"
             : "text-white/85 hover:bg-lpu-gold hover:text-lpu-maroon"
-          }`}
+        }`}
       >
         <BarChart2 size={16} />
         <span className="hidden lg:inline">Analytics</span>
@@ -106,16 +111,26 @@ const AnalyticsDropdown = ({ open, setOpen, innerRef, onMobileClose }) => {
         <div className="absolute left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 top-full w-44 bg-white dark:bg-zinc-900 rounded-xl shadow-xl py-2 border border-gray-100 dark:border-zinc-800 flex flex-col z-50 animate-in fade-in zoom-in-95 transition-colors duration-300">
           <NavLink
             to="/admin/analytics"
-            onClick={() => { setOpen(false); onMobileClose?.(); }}
-            className={({ isActive: a }) => `${linkBase} ${a ? linkActive : linkInactive}`}
+            onClick={() => {
+              setOpen(false);
+              onMobileClose?.();
+            }}
+            className={({ isActive: a }) =>
+              `${linkBase} ${a ? linkActive : linkInactive}`
+            }
           >
             <BarChart2 size={15} />
             <span>Stats</span>
           </NavLink>
           <NavLink
             to="/admin/insights"
-            onClick={() => { setOpen(false); onMobileClose?.(); }}
-            className={({ isActive: a }) => `${linkBase} ${a ? linkActive : linkInactive}`}
+            onClick={() => {
+              setOpen(false);
+              onMobileClose?.();
+            }}
+            className={({ isActive: a }) =>
+              `${linkBase} ${a ? linkActive : linkInactive}`
+            }
           >
             <Brain size={15} />
             <span>Insights</span>
@@ -186,7 +201,7 @@ export default function AdminNavbar() {
 
   // Adjusted alignment and padding: centered & thinner on 'md' (icons only), left-aligned & wider on 'lg' (with text)
   const linkBase =
-    "flex items-center justify-center lg:justify-start gap-2 px-3 md:px-2 lg:px-3 h-8 rounded-lg text-sm transition-all duration-200";
+    "flex items-center justify-center lg:justify-start gap-2 px-3 md:px-2 lg:px-3 h-8 rounded-lg text-sm transition-all duration-200 cursor-pointer";
   const linkInactive =
     "text-white/85 hover:bg-lpu-gold hover:text-lpu-maroon font-medium";
   const linkActive = "bg-lpu-red text-white font-bold shadow-sm";
@@ -269,12 +284,22 @@ export default function AdminNavbar() {
                 {/* Text remains visible in mobile dropdown menu */}
                 <span>Home</span>
               </NavLink>
-              <AnalyticsDropdown
-                open={analyticsOpen}
-                setOpen={setAnalyticsOpen}
-                innerRef={analyticsMobileRef}
-                onMobileClose={() => setIsMobileMenuOpen(false)}
-              />
+              <NavLink
+                to="/admin/analytics"
+                onClick={toggleMenu}
+                className={getLinkClass}
+              >
+                <BarChart2 size={16} />
+                <span>Stats</span>
+              </NavLink>
+              <NavLink
+                to="/admin/insights"
+                onClick={toggleMenu}
+                className={getLinkClass}
+              >
+                <Brain size={16} />
+                <span>Insights</span>
+              </NavLink>
               <NavLink
                 to="/admin/knowledge"
                 onClick={toggleMenu}

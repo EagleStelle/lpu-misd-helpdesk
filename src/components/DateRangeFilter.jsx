@@ -48,7 +48,7 @@ function DatePill({ value, placeholder, onChange }) {
       onKeyDown={(e) =>
         e.key === "Enter" && handleClick({ currentTarget: e.currentTarget })
       }
-      className="relative cursor-pointer select-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-lg px-3 h-9 flex items-center gap-2 min-w-28 text-xs font-semibold shadow-sm hover:border-lpu-maroon/40 hover:shadow transition-all focus-within:ring-2 focus-within:ring-lpu-maroon/20 focus-within:border-lpu-maroon/40"
+      className="relative cursor-pointer select-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg px-3 h-10 flex items-center gap-2 flex-1 md:flex-none md:min-w-28 min-w-0 text-xs font-semibold transition-all duration-200 focus-within:ring-2 focus-within:ring-lpu-gold focus-within:border-lpu-gold"
     >
       <Calendar className="w-3.5 h-3.5 text-gray-400 dark:text-zinc-500 shrink-0" />
       <span className="relative z-10 pointer-events-none whitespace-nowrap">
@@ -110,14 +110,14 @@ export function DateRangeFilter({ onChange, className = "" }) {
 
   return (
     <div
-      className={`flex flex-row items-center gap-2 ${className}`}
+      className={`flex flex-wrap items-center gap-2 w-full md:w-auto ${className}`}
     >
       {/* Segmented preset control */}
-      <div className="shrink-0 flex rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5 cursor-alias">
+      <div className="w-full md:w-auto shrink-0 h-10 flex rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/60 p-0.5 gap-0.5 cursor-alias">
         <button
           type="button"
           onClick={clearAll}
-          className={`px-3 h-8 rounded-md text-xs font-semibold transition-all duration-150 cursor-pointer ${
+          className={`flex-1 md:flex-none px-2 md:px-3 h-9 rounded-md text-xs font-semibold transition-all duration-150 cursor-pointer ${
             active === null
               ? "bg-lpu-maroon text-white shadow-sm"
               : "text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-zinc-200 hover:bg-white/70 dark:hover:bg-zinc-700/60"
@@ -130,7 +130,7 @@ export function DateRangeFilter({ onChange, className = "" }) {
             key={p.key}
             type="button"
             onClick={() => selectPreset(p.key)}
-            className={`px-3 h-8 rounded-md text-xs font-semibold transition-all duration-150 cursor-pointer ${
+            className={`flex-1 md:flex-none px-2 md:px-3 h-9 rounded-md text-xs font-semibold transition-all duration-150 cursor-pointer ${
               active === p.key
                 ? "bg-lpu-maroon text-white shadow-sm"
                 : "text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-zinc-200 hover:bg-white/70 dark:hover:bg-zinc-700/60"
@@ -141,9 +141,9 @@ export function DateRangeFilter({ onChange, className = "" }) {
         ))}
       </div>
 
-      {/* Custom date range pickers — fills remaining space */}
+      {/* Custom date range pickers — fills remaining space on desktop, full width on mobile */}
       {active === "custom" && (
-        <div className="flex-1 flex items-center gap-1.5 min-w-0">
+        <div className="w-full md:flex-1 md:w-auto flex items-center gap-1.5 min-w-0">
           <DatePill
             value={from}
             placeholder="From"

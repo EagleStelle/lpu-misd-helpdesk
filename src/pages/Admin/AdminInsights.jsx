@@ -216,8 +216,8 @@ function CardHeader({ icon: Icon, title, aside }) {
   return (
     <div className="flex items-center justify-between px-5 pt-3 pb-2.5 border-b border-gray-100 dark:border-white/5">
       <div className="flex items-center gap-2">
-        <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-lpu-maroon/8 dark:bg-lpu-maroon/15">
-          <Icon className="w-3.5 h-3.5 text-lpu-maroon" strokeWidth={2} />
+        <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-lpu-maroon/8 dark:bg-lpu-gold/20">
+          <Icon className="w-3.5 h-3.5 text-lpu-maroon dark:text-lpu-gold" strokeWidth={2} />
         </span>
         <h3 className="text-sm font-bold tracking-tight text-gray-900 dark:text-zinc-100">
           {title}
@@ -397,7 +397,7 @@ function KBEntry({ entry, index, added, adding, onAdd }) {
     <div
       className={`py-3.5 border-b border-gray-100 dark:border-white/5 last:border-0 ${added ? "opacity-40" : ""}`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="flex-1 min-w-0 space-y-2">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-500 mr-2">
@@ -419,7 +419,7 @@ function KBEntry({ entry, index, added, adding, onAdd }) {
         <button
           onClick={() => onAdd(index)}
           disabled={added || adding}
-          className={`shrink-0 mt-0.5 inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold border transition-all duration-200 active:scale-95 ${
+          className={`w-full sm:w-auto sm:shrink-0 sm:mt-0.5 inline-flex items-center justify-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold border transition-all duration-200 active:scale-95 ${
             added
               ? "bg-[#EDF3EC] text-[#346538] border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800 cursor-default"
               : adding
@@ -448,7 +448,7 @@ function ToggleBtn({ active, onClick, label }) {
     <button
       type="button"
       onClick={onClick}
-      className={`px-3 h-8 rounded-md text-xs font-semibold transition-all duration-150 cursor-pointer ${
+      className={`px-3 h-8 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer ${
         active
           ? "bg-lpu-maroon text-white shadow-sm"
           : "text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-zinc-200 hover:bg-white/70 dark:hover:bg-zinc-700/60"
@@ -563,7 +563,7 @@ function AnalysisProgress({ progress }) {
         <div className="flex items-center gap-2">
           <RefreshCw
             size={12}
-            className="animate-spin text-lpu-maroon shrink-0"
+            className="animate-spin text-lpu-maroon dark:text-lpu-gold shrink-0"
           />
           <span className="text-xs font-semibold text-gray-700 dark:text-zinc-300">
             {label}
@@ -923,10 +923,10 @@ export default function AdminAIAnalytics() {
       <div className="flex flex-col gap-4">
         {/* ── Run Analysis ── */}
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             {/* Left: period tabs + date input */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+              <div className="overflow-x-auto flex rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5">
                 {PERIOD_TYPES.map((pt) => (
                   <ToggleBtn
                     key={pt.value}
@@ -956,7 +956,7 @@ export default function AdminAIAnalytics() {
             </div>
 
             {/* Right: stats + action buttons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               {status != null && (
                 <span className="flex items-center gap-2 text-xs">
                   <span>
@@ -998,12 +998,12 @@ export default function AdminAIAnalytics() {
                       alreadyAnalyzed ||
                       periodType === "custom"
                     }
-                    className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold bg-lpu-maroon text-white border border-lpu-maroon hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold whitespace-nowrap bg-lpu-maroon text-white border border-lpu-maroon hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {analyzing ? (
                       <RefreshCw size={11} className="animate-spin" />
                     ) : (
-                      <Play size={11} />
+                      <Play size={16} />
                     )}
                     Analyze
                   </button>
@@ -1020,9 +1020,9 @@ export default function AdminAIAnalytics() {
                     type="button"
                     onClick={() => runAnalysis(true)}
                     disabled={analyzing || periodType === "custom"}
-                    className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold bg-white dark:bg-zinc-900 text-lpu-maroon dark:text-lpu-gold border border-lpu-maroon dark:border-lpu-gold hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold dark:hover:bg-lpu-gold dark:hover:text-lpu-maroon dark:hover:border-lpu-gold active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold whitespace-nowrap bg-white dark:bg-zinc-900 text-lpu-maroon dark:text-lpu-gold border border-lpu-maroon dark:border-lpu-gold hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold dark:hover:bg-lpu-gold dark:hover:text-lpu-maroon dark:hover:border-lpu-gold active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   >
-                    <AlertTriangle size={11} />
+                    <AlertTriangle size={16} />
                     Force Analyze
                   </button>
                 </div>
@@ -1048,22 +1048,24 @@ export default function AdminAIAnalytics() {
           <>
             {/* Category filter */}
             {availableCategories.length > 1 && (
-              <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5 flex-wrap">
-                <ToggleBtn
-                  active={!categoryFilter}
-                  onClick={() => setCategoryFilter(null)}
-                  label="All"
-                />
-                {availableCategories.map((cat) => (
+              <div className="overflow-x-auto max-w-full">
+                <div className="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5">
                   <ToggleBtn
-                    key={cat}
-                    active={categoryFilter === cat}
-                    onClick={() =>
-                      setCategoryFilter(categoryFilter === cat ? null : cat)
-                    }
-                    label={cat}
+                    active={!categoryFilter}
+                    onClick={() => setCategoryFilter(null)}
+                    label="All"
                   />
-                ))}
+                  {availableCategories.map((cat) => (
+                    <ToggleBtn
+                      key={cat}
+                      active={categoryFilter === cat}
+                      onClick={() =>
+                        setCategoryFilter(categoryFilter === cat ? null : cat)
+                      }
+                      label={cat}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 
@@ -1158,9 +1160,9 @@ export default function AdminAIAnalytics() {
         ) : (
           <Card>
             <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-              <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-lpu-maroon/8 dark:bg-lpu-maroon/15 mb-3">
+              <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-lpu-maroon/8 dark:bg-lpu-gold/20 mb-3">
                 <Sparkles
-                  className="w-6 h-6 text-lpu-maroon"
+                  className="w-6 h-6 text-lpu-maroon dark:text-lpu-gold"
                   strokeWidth={1.5}
                 />
               </span>

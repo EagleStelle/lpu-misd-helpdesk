@@ -625,7 +625,7 @@ export default function AdminTickets() {
 
   return (
     <section className="w-full px-6 py-4 md:py-6 font-[Poppins,Segoe_UI,Arial,sans-serif] h-full overflow-hidden flex flex-col dark:text-gray-100">
-      <div className="flex flex-col md:flex-row gap-3 mb-4">
+      <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
         <div className="w-full md:w-1/4">
           <FilterSelect
             value={filter}
