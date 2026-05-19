@@ -148,7 +148,7 @@ const SidePanel = ({ collapsed, onToggleCollapse, onAccountMenuChange }) => {
 
         /* Mobile */
         max-md:order-last max-md:shrink-0 max-md:w-full max-md:h-auto max-md:flex-row
-        max-md:rounded-t-2xl max-md:border-t-[6px] max-md:border-lpu-gold
+        max-md:rounded-t-2xl 
         max-md:pb-[env(safe-area-inset-bottom)]
         max-md:shadow-[0_-2px_12px_rgba(0,0,0,0.15)]
       `}

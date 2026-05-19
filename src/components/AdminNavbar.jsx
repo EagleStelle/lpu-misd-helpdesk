@@ -77,7 +77,7 @@ const AdminDropdown = ({
 const AnalyticsDropdown = ({ open, setOpen, innerRef, onMobileClose }) => {
   const location = useLocation();
   const isActive =
-    location.pathname === "/admin/analytics" || location.pathname === "/admin/ai-insights";
+    location.pathname === "/admin/analytics" || location.pathname === "/admin/insights";
 
   const linkBase =
     "flex items-center gap-2.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors w-full text-left";
@@ -113,7 +113,7 @@ const AnalyticsDropdown = ({ open, setOpen, innerRef, onMobileClose }) => {
             <span>Stats</span>
           </NavLink>
           <NavLink
-            to="/admin/ai-insights"
+            to="/admin/insights"
             onClick={() => { setOpen(false); onMobileClose?.(); }}
             className={({ isActive: a }) => `${linkBase} ${a ? linkActive : linkInactive}`}
           >

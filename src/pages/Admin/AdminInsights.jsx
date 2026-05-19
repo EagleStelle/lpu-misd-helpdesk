@@ -543,25 +543,31 @@ function PeriodInput({
 // ── analysis progress bar ─────────────────────────────────────────────────────
 
 const PHASE_LABELS = {
-  starting     : "Starting...",
-  batching     : "Analyzing tickets...",
-  feedback     : "Analyzing feedback...",
+  starting: "Starting...",
+  batching: "Analyzing tickets...",
+  feedback: "Analyzing feedback...",
   consolidating: "Consolidating results...",
-  kb           : "Generating KB suggestions...",
+  kb: "Generating KB suggestions...",
 };
 
 function AnalysisProgress({ progress }) {
   const { batchesDone, batchesTotal, phase } = progress;
-  const pct     = batchesTotal > 0 ? Math.round((batchesDone / batchesTotal) * 100) : null;
-  const label   = PHASE_LABELS[phase] || "Running...";
+  const pct =
+    batchesTotal > 0 ? Math.round((batchesDone / batchesTotal) * 100) : null;
+  const label = PHASE_LABELS[phase] || "Running...";
   const showBar = phase === "batching" && batchesTotal > 0;
 
   return (
     <div className="flex flex-col gap-2 px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-xl shadow-sm">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <RefreshCw size={12} className="animate-spin text-lpu-maroon shrink-0" />
-          <span className="text-xs font-semibold text-gray-700 dark:text-zinc-300">{label}</span>
+          <RefreshCw
+            size={12}
+            className="animate-spin text-lpu-maroon shrink-0"
+          />
+          <span className="text-xs font-semibold text-gray-700 dark:text-zinc-300">
+            {label}
+          </span>
         </div>
         {showBar && (
           <span className="text-xs text-gray-400 dark:text-zinc-500 tabular-nums shrink-0">
@@ -712,14 +718,23 @@ export default function AdminAIAnalytics() {
         const d = await r.json();
         if (!d.success) return;
 
-        setJobProgress({ batchesDone: d.batchesDone || 0, batchesTotal: d.batchesTotal || 0, phase: d.phase || "running" });
+        setJobProgress({
+          batchesDone: d.batchesDone || 0,
+          batchesTotal: d.batchesTotal || 0,
+          phase: d.phase || "running",
+        });
 
         if (d.status === "done") {
           clearInterval(poll);
           setActiveJobId(null);
           setAnalyzing(false);
           setJobProgress(null);
-          const { periodType: pt, periodKey: pk, customStart: cs, customEnd: ce } = jobPeriodRef.current || {};
+          const {
+            periodType: pt,
+            periodKey: pk,
+            customStart: cs,
+            customEnd: ce,
+          } = jobPeriodRef.current || {};
           await Promise.all([fetchStatus(), fetchResults(pt, pk, cs, ce)]);
           await checkPeriod(pt, pk, cs, ce);
         } else if (d.status === "failed") {
@@ -734,7 +749,7 @@ export default function AdminAIAnalytics() {
       }
     }, 3000);
     return () => clearInterval(poll);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeJobId]);
 
   const runAnalysis = async (force = false) => {
@@ -1026,9 +1041,7 @@ export default function AdminAIAnalytics() {
         {/* ── results ── */}
         {analyzing ? (
           <>
-            {jobProgress && (
-              <AnalysisProgress progress={jobProgress} />
-            )}
+            {jobProgress && <AnalysisProgress progress={jobProgress} />}
             <SkeletonResults />
           </>
         ) : hasResults ? (

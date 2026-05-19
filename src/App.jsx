@@ -87,7 +87,7 @@ function App() {
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/knowledge" element={<AdminKnowledge />} />
           <Route path="/admin/activity" element={<AdminActivity />} />
-          <Route path="/admin/ai-insights" element={<AdminInsights />} />
+          <Route path="/admin/insights" element={<AdminInsights />} />
           <Route
             path="/admin/manage"
             element={

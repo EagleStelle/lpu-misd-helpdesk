@@ -185,25 +185,41 @@ function DonutSegment({
   total,
   startOffset,
   isSelected,
+  anySelected,
+  gap = 5,
   onClick,
 }) {
   const circ = 2 * Math.PI * r;
-  const dash = total > 0 ? (value / total) * circ : 0;
+  const dash = total > 0 ? Math.max(0, (value / total) * circ - gap) : 0;
   if (dash <= 0) return null;
   return (
-    <circle
-      cx={cx}
-      cy={cy}
-      r={r}
-      fill="none"
-      stroke={color}
-      strokeWidth={isSelected ? strokeWidth + 3 : strokeWidth}
-      strokeDasharray={`${dash} ${circ}`}
-      strokeDashoffset={-startOffset}
-      onClick={onClick}
-      className="cursor-pointer transition-all duration-150"
-      style={{ opacity: isSelected ? 1 : 0.85 }}
-    />
+    <>
+      {isSelected && (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={r}
+          fill="none"
+          strokeWidth={strokeWidth + 6}
+          strokeDasharray={`${dash} ${circ}`}
+          strokeDashoffset={-startOffset}
+          className="stroke-lpu-maroon dark:stroke-lpu-gold pointer-events-none"
+        />
+      )}
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeDasharray={`${dash} ${circ}`}
+        strokeDashoffset={-startOffset}
+        onClick={onClick}
+        className="cursor-pointer transition-all duration-150"
+        style={{ opacity: anySelected ? (isSelected ? 1 : 0.25) : 0.9 }}
+      />
+    </>
   );
 }
 
@@ -217,11 +233,11 @@ function MultiRingDonutChart({
   onStatusClick,
 }) {
   const feedbackTotal = satisfiedCount + unsatisfiedCount;
-  const cx = 110,
-    cy = 110;
-  const outerR = 92,
-    innerR = 70,
-    sw = 18;
+  const cx = 130,
+    cy = 130;
+  const outerR = 112,
+    innerR = 82,
+    sw = 25;
   const outerCirc = 2 * Math.PI * outerR;
   const innerCirc = 2 * Math.PI * innerR;
   const satisfiedDash =
@@ -253,8 +269,8 @@ function MultiRingDonutChart({
 
   return (
     <div className="flex flex-row items-center gap-4">
-      <svg width="190" height="190" viewBox="0 0 220 220" className="shrink-0">
-        <g transform="rotate(-90, 110, 110)">
+      <svg width="210" height="210" viewBox="0 0 260 260" className="shrink-0">
+        <g transform="rotate(-90, 130, 130)">
           <circle
             cx={cx}
             cy={cy}
@@ -274,6 +290,7 @@ function MultiRingDonutChart({
             total={feedbackTotal}
             startOffset={0}
             isSelected={selectedStatuses.has("satisfied")}
+            anySelected={anySelected}
             onClick={() => onStatusClick?.("satisfied")}
           />
           <DonutSegment
@@ -286,6 +303,7 @@ function MultiRingDonutChart({
             total={feedbackTotal}
             startOffset={satisfiedDash}
             isSelected={selectedStatuses.has("unsatisfied")}
+            anySelected={anySelected}
             onClick={() => onStatusClick?.("unsatisfied")}
           />
           <circle
@@ -307,6 +325,7 @@ function MultiRingDonutChart({
             total={total}
             startOffset={0}
             isSelected={selectedStatuses.has("closed")}
+            anySelected={anySelected}
             onClick={() => onStatusClick?.("closed")}
           />
           <DonutSegment
@@ -319,6 +338,7 @@ function MultiRingDonutChart({
             total={total}
             startOffset={closedDash}
             isSelected={selectedStatuses.has("open")}
+            anySelected={anySelected}
             onClick={() => onStatusClick?.("open")}
           />
         </g>
@@ -331,9 +351,9 @@ function MultiRingDonutChart({
         />
         <text
           x={cx}
-          y={cy - 5}
+          y={cy - 4}
           textAnchor="middle"
-          fontSize="32"
+          fontSize={String(total).length <= 4 ? 30 : String(total).length <= 6 ? 24 : 18}
           fontWeight="700"
           fill="#111111"
           className="dark:fill-zinc-100"
@@ -358,22 +378,20 @@ function MultiRingDonutChart({
             key={key}
             type="button"
             onClick={() => onStatusClick?.(key)}
-            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-left transition-all duration-150 border w-full ${
+            className={`flex items-center gap-2 px-3 py-2 text-left transition-colors duration-150 w-full cursor-pointer ${
               anySelected && !selectedStatuses.has(key)
-                ? "opacity-40 border-transparent"
+                ? "opacity-40 text-gray-600 dark:text-zinc-400"
                 : selectedStatuses.has(key)
-                  ? "border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800 shadow-sm"
-                  : "border-transparent hover:border-gray-100 dark:hover:border-white/5 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                  ? "text-lpu-maroon dark:text-lpu-gold"
+                  : "text-gray-600 dark:text-zinc-400 hover:text-lpu-red dark:hover:text-lpu-red"
             }`}
           >
             <span
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: color }}
             />
-            <span className="text-xs font-medium text-gray-600 dark:text-zinc-400">
-              {label}
-            </span>
-            <span className="ml-auto text-xs font-bold text-gray-900 dark:text-zinc-100">
+            <span className="text-xs font-medium">{label}</span>
+            <span className="ml-auto text-xs font-bold tabular-nums text-gray-800 dark:text-zinc-200">
               {count}
             </span>
           </button>
@@ -396,7 +414,7 @@ function VerticalBarGraph({
       className="h-full flex flex-col gap-2"
       aria-label="Tickets by department bar chart"
     >
-      <div className="flex-1 min-h-0 grid grid-cols-3 md:grid-cols-6 gap-2 py-1">
+      <div className="flex-1 min-h-0 grid grid-cols-3 md:grid-cols-6 gap-3 py-1">
         {stats.map((item) => {
           const isEmpty = item.total === 0;
           const isSelected = selectedDepts.has(item.department);
@@ -430,14 +448,10 @@ function VerticalBarGraph({
               className={`group flex flex-col items-center gap-1.5 w-full h-full transition-all duration-150 outline-none ${!isEmpty && onBarClick ? "cursor-pointer" : ""}`}
             >
               <div className="shrink-0 flex w-full">
-                <span
-                  className={`flex-1 text-center text-xs font-bold tabular-nums transition-colors duration-150 ${isSelected ? "text-lpu-maroon" : "text-gray-800 dark:text-zinc-200"}`}
-                >
+                <span className="flex-1 text-center text-xs font-bold tabular-nums text-gray-800 dark:text-zinc-200">
                   {isEmpty ? "" : item.satisfied + item.unsatisfied}
                 </span>
-                <span
-                  className={`flex-1 text-center text-xs font-bold tabular-nums transition-colors duration-150 ${isSelected ? "text-lpu-maroon" : "text-gray-800 dark:text-zinc-200"}`}
-                >
+                <span className="flex-1 text-center text-xs font-bold tabular-nums text-gray-800 dark:text-zinc-200">
                   {isEmpty ? "" : item.total}
                 </span>
               </div>
@@ -445,7 +459,7 @@ function VerticalBarGraph({
               <div
                 className={`flex-1 min-h-0 w-full flex transition-all duration-150 ${
                   isSelected
-                    ? "outline-2 outline-lpu-maroon outline-offset-2 rounded-lg"
+                    ? "outline-2 outline-lpu-maroon dark:outline-lpu-gold outline-offset-2 rounded-lg"
                     : !isEmpty && onBarClick
                       ? "group-hover:scale-[1.03]"
                       : ""
@@ -530,9 +544,9 @@ function VerticalBarGraph({
 
 // ─── Stacked distribution bar ─────────────────────────────────────────────────
 const BREAKDOWN_ICONS = {
-  "By Type": UserSquare2,
-  "By Category": Tag,
-  "By Site": MapPin,
+  Type: UserSquare2,
+  Category: Tag,
+  Site: MapPin,
 };
 
 function StackedDistributionBar({
@@ -542,83 +556,116 @@ function StackedDistributionBar({
   onSegmentClick,
 }) {
   const total = data.reduce((acc, item) => acc + item.value, 0);
+  let cumulative = 0;
+  const segments = data.map((item, idx) => {
+    const percentage = total > 0 ? (item.value / total) * 100 : 0;
+    const midpoint = cumulative + percentage / 2;
+    cumulative += percentage;
+    return {
+      ...item,
+      percentage,
+      midpoint,
+      color: DISTRIBUTION_COLORS[idx % DISTRIBUTION_COLORS.length],
+    };
+  });
+
   const TitleIcon = BREAKDOWN_ICONS[title];
 
   return (
-    <div className="bg-gray-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-white/5 rounded-xl p-2.5 mb-1.5 last:mb-0">
-      <div className="flex items-center gap-2 mb-2">
+    <div
+      className="grid gap-x-4 py-3 border-b border-gray-100 dark:border-white/5 last:border-0"
+      style={{ gridTemplateColumns: "7rem 1fr", gridTemplateRows: "auto auto" }}
+    >
+      {/* Left label — spans both rows, centers between labels + bar */}
+      <div className="row-span-2 flex items-center gap-2 pr-2">
         {TitleIcon && (
           <TitleIcon
-            className="w-3.5 h-3.5 text-gray-400 dark:text-zinc-500"
+            className="w-3.5 h-3.5 text-gray-600 dark:text-zinc-300 shrink-0"
             strokeWidth={2}
           />
         )}
-        <h4 className="text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">
+        <span className="text-xs font-semibold text-gray-600 dark:text-zinc-300">
           {title}
-        </h4>
+        </span>
       </div>
 
-      {/* Rounded segmented bar */}
-      <div className="w-full h-5 bg-gray-200/60 dark:bg-zinc-700/40 rounded-full overflow-hidden flex">
-        {data.map((item, idx) => {
-          if (item.value === 0) return null;
-          const percentage = total > 0 ? (item.value / total) * 100 : 0;
-          const color = DISTRIBUTION_COLORS[idx % DISTRIBUTION_COLORS.length];
-          const isSelected = selectedValues.has(item.label);
-
-          return (
-            <div
-              key={item.label}
-              role="button"
-              tabIndex={0}
-              onClick={() => onSegmentClick?.(item.label)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onSegmentClick?.(item.label);
-                }
-              }}
-              className={`h-full flex items-center justify-center text-white text-[10px] font-bold cursor-pointer outline-none transition-all duration-150 border-r border-white/15 last:border-0 ${
-                isSelected ? "brightness-110" : "hover:brightness-110"
-              }`}
-              style={{ width: `${percentage}%`, backgroundColor: color }}
-            >
-              {percentage > 8 && (
-                <span className="truncate px-1">{Math.round(percentage)}%</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
-        {data.map((item, idx) => {
-          const isSelected = selectedValues.has(item.label);
+      {/* Segment labels — absolutely positioned at each segment's midpoint */}
+      <div className="relative h-6 mb-2.5">
+        {segments.map((seg) => {
+          if (seg.value === 0) return null;
+          const isSelected = selectedValues.has(seg.label);
+          const anySelected = selectedValues.size > 0;
           return (
             <button
-              key={item.label}
+              key={seg.label}
               type="button"
-              onClick={() => onSegmentClick?.(item.label)}
-              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-2 py-1 text-[10px] font-medium cursor-pointer transition-all duration-150 ${
-                isSelected
-                  ? "bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-lpu-maroon/40 text-gray-800 dark:text-zinc-200"
-                  : "text-gray-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-900/60 hover:text-gray-700 dark:hover:text-zinc-300"
+              onClick={() => onSegmentClick?.(seg.label)}
+              className={`absolute flex items-center gap-1 text-xs cursor-pointer transition-colors duration-150 whitespace-nowrap -translate-x-1/2 top-0 ${
+                anySelected && !isSelected
+                  ? "opacity-40 text-gray-500 dark:text-zinc-400"
+                  : isSelected
+                    ? "text-lpu-maroon dark:text-lpu-gold"
+                    : "text-gray-500 dark:text-zinc-400 hover:text-lpu-red dark:hover:text-lpu-red"
               }`}
+              style={{ left: `${seg.midpoint}%` }}
             >
               <span
-                className="w-1.5 h-1.5 rounded-full shrink-0"
-                style={{
-                  backgroundColor:
-                    DISTRIBUTION_COLORS[idx % DISTRIBUTION_COLORS.length],
-                }}
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: seg.color }}
               />
-              {item.label}
-              <span className="font-bold text-gray-700 dark:text-zinc-300">
-                {item.value}
-              </span>
+              <span className="font-medium">{seg.label}</span>
+              <span className="font-bold ml-0.5">{seg.value}</span>
             </button>
           );
         })}
+      </div>
+
+      {/* Bar */}
+      <div className="h-5 bg-gray-100 dark:bg-zinc-800/80 rounded-lg overflow-hidden flex">
+        {(() => {
+          const anySelected = selectedValues.size > 0;
+          const visibleSegs = segments.filter((s) => s.percentage > 0);
+          const firstLabel = visibleSegs[0]?.label;
+          const lastLabel = visibleSegs[visibleSegs.length - 1]?.label;
+          return segments.map((seg) => {
+            const isSelected = selectedValues.has(seg.label);
+            const isFirst = seg.label === firstLabel;
+            const isLast = seg.label === lastLabel;
+            const roundClass =
+              isFirst && isLast
+                ? "rounded-lg"
+                : isFirst
+                  ? "rounded-l-lg"
+                  : isLast
+                    ? "rounded-r-lg"
+                    : "";
+            return (
+              <div
+                key={seg.label}
+                role="button"
+                tabIndex={0}
+                onClick={() => onSegmentClick?.(seg.label)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSegmentClick?.(seg.label);
+                  }
+                }}
+                className={`h-full cursor-pointer outline-none transition-all duration-150 border-r-2 border-white dark:border-zinc-900 last:border-0 ${roundClass} ${
+                  anySelected && !isSelected
+                    ? "opacity-30"
+                    : isSelected
+                      ? "opacity-100 ring-2 ring-inset ring-lpu-maroon dark:ring-lpu-gold"
+                      : "opacity-100 hover:brightness-110"
+                }`}
+                style={{
+                  width: `${seg.percentage}%`,
+                  backgroundColor: seg.color,
+                }}
+              />
+            );
+          });
+        })()}
       </div>
     </div>
   );
@@ -672,10 +719,11 @@ function SlaSection({
             No SLA data available
           </p>
         ) : (
-          <div className="space-y-2">
+          <div className="divide-y divide-gray-100 dark:divide-white/5">
             {sortedAdmins.map((adminEntry) => {
               const isCurrentUser = adminEntry.adminId === currentUserId;
               const isSelected = selectedAdminIds.has(adminEntry.adminId);
+              const anySelected = selectedAdminIds.size > 0;
               return (
                 <div
                   key={adminEntry.adminId}
@@ -693,24 +741,29 @@ function SlaSection({
                       onAdminClick?.(adminEntry.adminId);
                     }
                   }}
-                  className={`rounded-xl p-3 transition-all duration-150 border ${
-                    isSelected
-                      ? "ring-2 ring-lpu-maroon ring-offset-1 bg-lpu-maroon/5 border-lpu-maroon/20"
-                      : isCurrentUser
-                        ? "bg-lpu-maroon/4 border-lpu-maroon/15"
-                        : "bg-gray-50 dark:bg-zinc-800/40 border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/10"
+                  className={`py-2.5 px-2 rounded-lg border transition-all duration-150 ${
+                    anySelected && !isSelected
+                      ? "opacity-40 border-transparent"
+                      : isSelected
+                        ? "ring-2 ring-lpu-maroon dark:ring-lpu-gold border-transparent"
+                        : isGlobalAdminUser
+                          ? "border-transparent hover:border-gray-200 dark:hover:border-white/10"
+                          : "border-transparent"
                   } ${isGlobalAdminUser ? "cursor-pointer" : ""}`}
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users
-                      className="w-3.5 h-3.5 text-gray-400 dark:text-zinc-500"
-                      strokeWidth={2}
-                    />
-                    <span className="text-sm font-bold text-gray-900 dark:text-zinc-100 truncate">
+                  <div
+                    className={`flex items-center gap-2 mb-2.5 text-xs font-semibold ${
+                      isSelected
+                        ? "text-lpu-maroon dark:text-lpu-gold"
+                        : "text-gray-600 dark:text-zinc-400"
+                    }`}
+                  >
+                    <Users className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+                    <span className="truncate">
                       {adminEntry.adminName || "Unknown Admin"}
                     </span>
                     {isCurrentUser && (
-                      <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-lpu-maroon/10 text-lpu-maroon">
+                      <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-lpu-maroon/10 text-lpu-maroon shrink-0">
                         You
                       </span>
                     )}
@@ -722,11 +775,11 @@ function SlaSection({
                         count: 0,
                         avgMinutes: 0,
                       };
-                      const { icon: PIcon, bg, text } = PRIORITY_META[priority];
+                      const { icon: PIcon, text } = PRIORITY_META[priority];
                       return (
                         <div
                           key={priority}
-                          className={`flex flex-col items-center gap-1 p-2 rounded-lg ${bg}`}
+                          className="flex flex-col items-center gap-1 py-1.5"
                         >
                           <div className="flex items-center gap-1">
                             <PIcon
@@ -734,12 +787,12 @@ function SlaSection({
                               strokeWidth={2.5}
                             />
                             <span
-                              className={`text-[10px] font-bold uppercase tracking-wide ${text}`}
+                              className={`text-[10px] font-semibold ${text}`}
                             >
                               {priority}
                             </span>
                           </div>
-                          <span className="text-sm font-bold text-gray-900 dark:text-zinc-100 tabular-nums">
+                          <span className="text-xs font-bold text-gray-800 dark:text-zinc-200 tabular-nums">
                             {stat.count > 0
                               ? formatMinutesOneDecimal(stat.avgMinutes)
                               : "—"}
@@ -1383,21 +1436,21 @@ export default function AdminAnalytics() {
               </Card>
               <Card className="shrink-0 flex flex-col">
                 <CardHeader icon={LayoutList} title="Breakdown" />
-                <div className="px-4 py-3 flex flex-col gap-1">
+                <div className="px-4 py-1">
                   <StackedDistributionBar
-                    title="By Type"
+                    title="Type"
                     data={typeData}
                     selectedValues={selectedTypes}
                     onSegmentClick={handleTypeClick}
                   />
                   <StackedDistributionBar
-                    title="By Category"
+                    title="Category"
                     data={categoryData}
                     selectedValues={selectedCategories}
                     onSegmentClick={handleCategoryClick}
                   />
                   <StackedDistributionBar
-                    title="By Site"
+                    title="Site"
                     data={siteData}
                     selectedValues={selectedSites}
                     onSegmentClick={handleSiteClick}
