@@ -50,8 +50,19 @@ function SubmitTicket() {
   useLayoutEffect(() => {
     const mainEl = document.querySelector("main");
     if (!mainEl) return;
-    mainEl.style.overflowY = "hidden";
-    return () => { mainEl.style.overflowY = ""; };
+
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const handleMediaChange = (e) => {
+      mainEl.style.overflowY = e.matches ? "hidden" : "";
+    };
+
+    handleMediaChange(mediaQuery);
+    mediaQuery.addEventListener("change", handleMediaChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleMediaChange);
+      mainEl.style.overflowY = "";
+    };
   }, []);
 
   const handleChange = (e) => {
