@@ -1,9 +1,7 @@
 /* global process */
+import "./env.js";
 import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
-
-dotenv.config();
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey =

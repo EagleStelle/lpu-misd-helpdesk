@@ -388,13 +388,22 @@ export default function AdminTickets() {
           ? { status: "Open", closed_at: null }
           : { status: "Closed", closed_at: new Date().toISOString() };
 
-        const { error } = await realtimeSupabase
-          .from("Tickets")
-          .update(payload)
-          .eq("id", ticket.id);
+        const token = localStorage.getItem("authToken");
+        const res = await fetch(
+          `${getApiBaseUrl()}/api/tickets/${ticket.id}/status`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          },
+        );
+        const json = await res.json().catch(() => ({}));
 
-        if (error) {
-          alert(error.message || "Failed to update ticket status");
+        if (!res.ok || !json.success) {
+          alert(json.message || "Failed to update ticket status");
           return;
         }
         setRealtimeTick((n) => n + 1);

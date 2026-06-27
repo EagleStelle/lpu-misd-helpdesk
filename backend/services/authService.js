@@ -1,4 +1,5 @@
 /* global process */
+import "../config/env.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { randomUUID } from "crypto";
@@ -16,8 +17,8 @@ const MAGIC_LINK_ALLOWED_DOMAINS = String(
     .map((domain) => domain.trim().toLowerCase())
     .filter(Boolean);
 
-/** If false, unverified admins may still sign in (local dev without Resend). UI should only show "Verified" when `email_verified_at` is set. */
-const isAdminEmailVerificationEnforced = () => Boolean(String(process.env.RESEND_API_KEY || "").trim());
+/** Supabase Auth sends admin invites; only verified admins may sign in. */
+const isAdminEmailVerificationEnforced = () => true;
 
 const isAllowedMagicLinkEmail = (email) => {
     const normalized = String(email || "").trim().toLowerCase();

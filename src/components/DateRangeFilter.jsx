@@ -113,7 +113,7 @@ export function DateRangeFilter({ onChange, className = "" }) {
       className={`flex flex-wrap items-center gap-2 w-full md:w-auto ${className}`}
     >
       {/* Segmented preset control */}
-      <div className="w-full md:w-auto shrink-0 h-10 flex rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/60 p-0.5 gap-0.5 cursor-alias">
+      <div className="w-full md:w-auto shrink-0 h-10 flex rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/60 p-0.5 gap-0.5 cursor-alias">
         <button
           type="button"
           onClick={clearAll}

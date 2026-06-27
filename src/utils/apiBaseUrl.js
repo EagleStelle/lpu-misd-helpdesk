@@ -1,6 +1,15 @@
+import { getRuntimeConfig } from "./runtimeConfig.js";
+
 export function getApiBaseUrl() {
-  const localUrl = import.meta.env.VITE_API_BASE_URL_LOCAL || "http://localhost:5000";
-  const prodUrl = import.meta.env.VITE_API_BASE_URL_PROD || "";
+  const normalizeBaseUrl = (url) => {
+    if (url === "/") return "";
+    return (url || "").replace(/\/$/, "");
+  };
+
+  const localUrl = normalizeBaseUrl(
+    getRuntimeConfig("VITE_API_BASE_URL_LOCAL", "http://localhost:5000"),
+  );
+  const prodUrl = normalizeBaseUrl(getRuntimeConfig("VITE_API_BASE_URL_PROD"));
 
   const isLocalhost =
     typeof window !== "undefined" &&

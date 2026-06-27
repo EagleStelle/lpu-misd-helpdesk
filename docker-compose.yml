@@ -1,0 +1,22 @@
+services:
+  lpul-misd-helpdesk:
+    image: eaglestelle/lpul-misd-helpdesk:latest
+    environment:
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:5000}
+      VITE_PUBLIC_BASE_URL: ${VITE_PUBLIC_BASE_URL:-}
+      VITE_API_BASE_URL_PROD: ${VITE_API_BASE_URL_PROD:-/}
+      VITE_API_BASE_URL_LOCAL: ${VITE_API_BASE_URL_LOCAL:-http://localhost:5000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+      VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-}
+      MAGIC_LINK_ALLOWED_DOMAINS: ${MAGIC_LINK_ALLOWED_DOMAINS:-@lpulaguna.edu.ph,@lpusc.edu.ph}
+      ADMIN_SEED_FULL_NAME: ${ADMIN_SEED_FULL_NAME:-System Admin}
+      ADMIN_SEED_EMAIL: ${ADMIN_SEED_EMAIL:-}
+      ADMIN_SEED_PASSWORD: ${ADMIN_SEED_PASSWORD:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+    ports:
+      - "5000:5000"
+    restart: unless-stopped

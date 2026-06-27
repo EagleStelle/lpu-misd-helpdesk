@@ -324,15 +324,33 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
       }
     }
 
-    if (req.user.app_role === "admin") {
-      const adminId = req.user.id || req.user.sub;
-      logActivity({
-        adminId,
-        actionType: status === "Open" ? "TICKET_REOPENED" : "TICKET_CLOSED",
-        targetId: ticketId,
-        targetLabel: `#${ticketId}`,
-      });
-    }
+    const actorId = req.user.id || req.user.sub;
+    const isAdminActor = req.user.app_role === "admin";
+    const actorTable = isAdminActor ? "admin_users" : "auth_users";
+    const { data: actorRows } = await supabase
+      .from(actorTable)
+      .select("full_name, email")
+      .eq("id", actorId)
+      .limit(1);
+    const actor = actorRows?.[0] || {};
+    await logActivity({
+      adminId: actorId,
+      actionType: status === "Open" ? "TICKET_REOPENED" : "TICKET_CLOSED",
+      targetId: ticketId,
+      targetLabel: `#${ticketId}`,
+      metadata: {
+        actor_role: isAdminActor ? "admin" : "user",
+        actor_name:
+          actor.full_name ||
+          (!isAdminActor ? data[0]?.created_by_name : null) ||
+          null,
+        actor_email:
+          actor.email ||
+          req.user.email ||
+          (!isAdminActor ? data[0]?.created_by_email : null) ||
+          null,
+      },
+    });
 
     return res.json({ success: true, data: data[0] });
   } catch (e) {

@@ -307,7 +307,7 @@ export default function AdminManage() {
               payload.invitationEmailSent === false
             ) {
               alert(
-                "Account created, but the invitation email was not sent. Check RESEND_ configuration or server logs.",
+                "Account created, but the invitation email was not sent. Check Supabase email settings or server logs.",
               );
             }
           }}

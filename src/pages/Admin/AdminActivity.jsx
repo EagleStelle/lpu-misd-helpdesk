@@ -19,7 +19,7 @@ const ACTION_META = {
   TICKET_REOPENED: {
     label: "Reopened Ticket",
     color:
-      "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/25 dark:text-green-400 dark:border-green-700/40",
+      "bg-lpu-gold/15 text-lpu-maroon border-lpu-gold/60 dark:bg-lpu-gold/15 dark:text-lpu-gold dark:border-lpu-gold/40",
   },
   TICKET_ASSIGNED: {
     label: "Assigned Ticket",
@@ -116,6 +116,118 @@ function apiUrl(path) {
   return `${getApiBaseUrl()}${path}`;
 }
 
+function getActor(row) {
+  return row.actor || row.admin || null;
+}
+
+function getActorDisplayName(row) {
+  const actor = getActor(row);
+  const meta = row.metadata || {};
+  return (
+    actor?.full_name ||
+    actor?.email ||
+    meta.actor_name ||
+    meta.actor_email ||
+    ""
+  );
+}
+
+function isUserActor(row) {
+  const actor = getActor(row);
+  return actor?.is_user || row.metadata?.actor_role === "user";
+}
+
+function getPerformedByLabel(row) {
+  return isUserActor(row) ? "User" : getActorDisplayName(row);
+}
+
+function withActor(parts, row) {
+  const actorName = getActorDisplayName(row);
+  return actorName ? [...parts, " by ", { b: actorName }] : parts;
+}
+
+// Returns an array of segments. A string is plain text; { b: "..." } is bold.
+function formatTargetParts(row) {
+  const meta = row.metadata || {};
+  const label = row.target_label || "";
+  const id = row.target_id || "";
+
+  const ticketNo = String(label || id).replace(/^#/, "").trim();
+
+  switch (row.action_type) {
+    case "TICKET_CLOSED":
+      return withActor(
+        ticketNo
+          ? ["Closed ticket ", { b: `#${ticketNo}` }]
+          : ["Closed a ticket"],
+        row,
+      );
+    case "TICKET_REOPENED":
+      return withActor(
+        ticketNo
+          ? ["Reopened ticket ", { b: `#${ticketNo}` }]
+          : ["Reopened a ticket"],
+        row,
+      );
+    case "TICKET_ASSIGNED": {
+      const names = (meta.addedNames || []).join(", ");
+      if (id && names)
+        return ["Assigned ticket ", { b: `#${id}` }, " to ", { b: names }];
+      if (id) return ["Updated assignees on ticket ", { b: `#${id}` }];
+      return [label || "Assigned a ticket"];
+    }
+    case "ADMIN_CREATED":
+      return meta.email
+        ? ["Created admin ", { b: label }, " with email ", { b: meta.email }]
+        : ["Created admin ", { b: label }];
+    case "ADMIN_DELETED":
+      return meta.email
+        ? ["Removed admin ", { b: label }, " with email ", { b: meta.email }]
+        : ["Removed admin ", { b: label }];
+    case "ADMIN_ENABLED":
+      return ["Enabled admin ", { b: label }];
+    case "ADMIN_DISABLED":
+      return ["Disabled admin ", { b: label }];
+    case "ADMIN_LEVEL_CHANGED": {
+      const [name, lvl] = label.split(", set to ");
+      if (name && lvl)
+        return ["Changed access level for ", { b: name }, " to ", { b: lvl }];
+      return [label || "Changed an admin access level"];
+    }
+    case "KNOWLEDGE_ADDED":
+      return ["Added knowledge article ", { b: label || "untitled" }];
+    case "KNOWLEDGE_EDITED":
+      return ["Edited knowledge article ", { b: label || "untitled" }];
+    case "KNOWLEDGE_DELETED":
+      return ["Deleted knowledge article ", { b: label || "untitled" }];
+    case "KNOWLEDGE_BULK_DELETED":
+      return ["Bulk deleted knowledge article ", { b: label || "untitled" }];
+    case "PROFILE_NAME_CHANGED": {
+      const name = label.replace(/^Full name changed to /, "");
+      return name ? ["Changed full name to ", { b: name }] : ["Changed full name"];
+    }
+    case "PROFILE_EMAIL_CHANGED": {
+      const email = label.replace(/^Email changed to /, "");
+      return email ? ["Changed email to ", { b: email }] : ["Changed email"];
+    }
+    case "PROFILE_PASSWORD_CHANGED":
+      return ["Changed password"];
+    case "AI_ANALYSIS_RUN": {
+      const m = label.match(/^(.*?)(\d+ tickets?) for (.+)$/);
+      if (m) return [m[1], { b: m[2] }, " for ", { b: m[3] }];
+      return [label || "Ran AI analysis"];
+    }
+    default:
+      return [label || id || "No details"];
+  }
+}
+
+function formatTargetText(row) {
+  return formatTargetParts(row)
+    .map((p) => (typeof p === "string" ? p : p.b))
+    .join("");
+}
+
 function escapeCsv(value) {
   const s = String(value ?? "");
   if (s.includes(",") || s.includes('"') || s.includes("\n")) {
@@ -193,17 +305,17 @@ export default function AdminActivity() {
       if (!json.success) return;
 
       const headers = isGlobal
-        ? ["date", "admin", "action", "target"]
+        ? ["date", "performed_by", "action", "target"]
         : ["date", "action", "target"];
 
       const rows = (json.data || []).map((log) => {
         const meta = ACTION_META[log.action_type];
         const action = meta?.label || log.action_type;
-        const target = log.target_label || log.target_id || "";
+        const target = formatTargetText(log);
         const date = log.created_at;
         if (isGlobal) {
-          const admin = log.admin?.full_name || log.admin?.email || "";
-          return [date, admin, action, target];
+          const performedBy = getPerformedByLabel(log);
+          return [date, performedBy, action, target];
         }
         return [date, action, target];
       });
@@ -254,11 +366,21 @@ export default function AdminActivity() {
 
     if (isGlobal) {
       cols.push({
-        label: "Admin",
+        label: "Performed By",
         accessor: (row) =>
-          row.admin?.full_name || row.admin?.email || "Unknown",
+          getPerformedByLabel(row) || "Unknown",
         variant: "title",
-        colWidth: "w-52",
+        colWidth: "w-44",
+        render: (row) => {
+          const name = getPerformedByLabel(row) || "Unknown";
+          return (
+            <span className="flex items-center gap-1.5 min-w-0">
+              <span className="truncate text-sm font-medium text-gray-800 dark:text-zinc-200">
+                {name}
+              </span>
+            </span>
+          );
+        },
       });
     }
 
@@ -286,13 +408,24 @@ export default function AdminActivity() {
       label: "Target",
       colWidth: "",
       render: (row) => {
-        const text = row.target_label || row.target_id || "—";
+        const parts = formatTargetParts(row);
         return (
           <span
             className="block w-full truncate text-sm text-gray-600 dark:text-zinc-400"
-            title={text}
+            title={formatTargetText(row)}
           >
-            {text}
+            {parts.map((p, i) =>
+              typeof p === "string" ? (
+                p
+              ) : (
+                <strong
+                  key={i}
+                  className="font-semibold text-gray-800 dark:text-zinc-200"
+                >
+                  {p.b}
+                </strong>
+              ),
+            )}
           </span>
         );
       },
@@ -320,7 +453,7 @@ export default function AdminActivity() {
         />
         <div className="flex-1 min-w-0">
           <SearchInput
-            placeholder="Search admin, action, or target..."
+            placeholder="Search name, action, or target..."
             onSearch={handleSearch}
           />
         </div>
@@ -336,7 +469,7 @@ export default function AdminActivity() {
             columns={columns}
             data={logs}
             emptyMessage="No activity yet."
-            emptySubMessage="Actions will appear here as admins use the system."
+            emptySubMessage="Actions will appear here as admins and users use the system."
             page={page}
             pageCount={pageCount}
             totalCount={totalCount}

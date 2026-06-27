@@ -3,16 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getApiBaseUrl } from "../utils/apiBaseUrl";
 import { jwtDecode } from "jwt-decode";
 
-const envGet = (env, k) => env?.[k] ?? env?.[`VITE_${k}`];
-function getRateWindowMs(env) {
-  const v = Number(
-    envGet(env, "CHATBOT_LIMIT_WINDOW_MS") ||
-      envGet(env, "CHATBOT_RATE_WINDOW_MS"),
-  );
-  if (v > 0) return v;
-  return 24 * 60 * 60 * 1000;
-}
-
+const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
 const SPAM_THRESHOLD_COUNT = 3;
 const SPAM_WINDOW_MS = 6_000;
 const SPAM_BASE_COOLDOWN_MS = 5_000;
@@ -70,7 +61,7 @@ export function useChatbot() {
     return `chatLimiter:session:${sessionId}`;
   })();
 
-  const rateWindowMs = getRateWindowMs(import.meta.env);
+  const rateWindowMs = RATE_WINDOW_MS;
 
   const formatWait = (ms) => {
     const s = Math.max(1, Math.ceil(ms / 1000));

@@ -3,9 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { Eye, EyeOff, Mail } from "lucide-react";
 import { getApiBaseUrl } from "../../utils/apiBaseUrl";
+import { getRuntimeConfig } from "../../utils/runtimeConfig";
 import supabaseAuth from "../../lib/supabaseAuthClient";
 import { realtimeSupabase } from "../../lib/realtimeSupabaseClient";
 import { PrimaryButton, FloatingInput } from "../../components/FormFields";
+
+const getPublicBaseUrl = () => {
+  const configuredBase = getRuntimeConfig("VITE_PUBLIC_BASE_URL");
+  const fallbackBase =
+    typeof window !== "undefined" ? window.location.origin : "";
+
+  return (configuredBase || fallbackBase).replace(/\/$/, "");
+};
 
 const LoginPage = () => {
   const [mode, setMode] = useState("magic"); // "magic" | "admin"
@@ -59,7 +68,7 @@ const LoginPage = () => {
       const { error: supaError } = await supabaseAuth.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${getPublicBaseUrl()}/auth/callback`,
           shouldCreateUser: true,
         },
       });

@@ -403,6 +403,33 @@ function MultiRingDonutChart({
   );
 }
 
+// ─── Department legend (lives in card header) ─────────────────────────────────
+const DEPT_LEGEND = [
+  { color: "#22c55e", label: "Satisfied" },
+  { color: "#f43f5e", label: "Unsatisfied" },
+  { color: "#336be3", label: "Closed" },
+  { color: "#e6bc23", label: "Open" },
+];
+
+function DeptLegend() {
+  return (
+    <div className="flex flex-col items-end sm:flex-row sm:items-center gap-x-4 gap-y-1">
+      {DEPT_LEGEND.map(({ color, label }) => (
+        <div
+          key={label}
+          className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-zinc-400"
+        >
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ backgroundColor: color }}
+          />
+          {label}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Vertical bar graph ───────────────────────────────────────────────────────
 function VerticalBarGraph({
   chartData,
@@ -520,25 +547,6 @@ function VerticalBarGraph({
             </div>
           );
         })}
-      </div>
-
-      <div className="flex gap-4 justify-center pt-2 border-t border-gray-100 dark:border-white/5">
-        <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-zinc-400">
-          <span className="w-2 h-2 rounded-full bg-[#22c55e]" />
-          Satisfied
-        </div>
-        <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-zinc-400">
-          <span className="w-2 h-2 rounded-full bg-[#f43f5e]" />
-          Unsatisfied
-        </div>
-        <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-zinc-400">
-          <span className="w-2 h-2 rounded-full bg-[#336be3]" />
-          Closed
-        </div>
-        <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-zinc-400">
-          <span className="w-2 h-2 rounded-full bg-[#e6bc23]" />
-          Open
-        </div>
       </div>
     </div>
   );
@@ -1456,7 +1464,11 @@ export default function AdminAnalytics() {
             {/* Right column: Department (stretches) + Breakdown (natural height) */}
             <div className="flex-1 min-h-0 flex flex-col gap-2">
               <Card className="md:flex-1 md:min-h-0 flex flex-col">
-                <CardHeader icon={Building2} title="Tickets by Department" />
+                <CardHeader
+                  icon={Building2}
+                  title="Tickets by Department"
+                  aside={<DeptLegend />}
+                />
                 <div className="h-96 md:h-auto md:flex-1 min-h-0 flex flex-col px-4 py-3">
                   <VerticalBarGraph
                     chartData={departmentChartData}

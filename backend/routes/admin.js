@@ -6,8 +6,6 @@ import { adminMiddleware, globalAdminMiddleware } from "../middleware/auth.js";
 import { supabase } from "../config/database.js";
 import { logActivity } from "../services/activityService.js";
 
-const resendApiConfigured = () => Boolean(String(process.env.RESEND_API_KEY || "").trim());
-
 const router = express.Router();
 
 async function getRootAdminId() {
@@ -200,9 +198,7 @@ router.get("/assignees", adminMiddleware, async (req, res) => {
             .eq("is_active", true)
             .neq("id", callerId);
 
-        if (resendApiConfigured()) {
-            othersQuery = othersQuery.not("email_verified_at", "is", null);
-        }
+        othersQuery = othersQuery.not("email_verified_at", "is", null);
 
         const { data: others, error } = await othersQuery;
 
@@ -329,10 +325,18 @@ router.post("/admins", globalAdminMiddleware, async (req, res) => {
         let invitationEmailError = null;
 
         try {
+            const forwardedProto = String(req.get("x-forwarded-proto") || "")
+                .split(",")[0]
+                .trim();
+            const forwardedHost = String(req.get("x-forwarded-host") || "")
+                .split(",")[0]
+                .trim();
+            const requestHost = forwardedHost || req.get("host") || "localhost:5000";
+            const requestProto = forwardedProto || req.protocol || "http";
             const rawBase =
                 process.env.PUBLIC_BASE_URL ||
-                (process.env.CORS_ORIGINS || "").split(",")[0].trim() ||
-                "http://localhost:5173";
+                process.env.VITE_PUBLIC_BASE_URL ||
+                `${requestProto}://${requestHost}`;
             const publicBase = (/^https?:\/\//i.test(rawBase) ? rawBase : `http://${rawBase}`)
                 .replace(/\/$/, "");
             const verifyUrl = `${publicBase}/admin/verify-email`;
@@ -523,7 +527,7 @@ router.patch("/admins/:adminId", globalAdminMiddleware, async (req, res) => {
 /**
  * GET /api/admin/activity
  * Any admin — returns activity logs.
- * Global admins see all; ticket admins see only their own.
+ * Global admins see all; ticket admins see their own activity plus ticket status activity.
  */
 const ACTIVITY_PAGE_SIZE = 20;
 
@@ -544,7 +548,7 @@ router.get("/activity", adminMiddleware, async (req, res) => {
             .order("created_at", { ascending: false });
 
         if (!isGlobal) {
-            query = query.eq("admin_id", callerId);
+            query = query.or(`admin_id.eq.${callerId},action_type.in.(TICKET_CLOSED,TICKET_REOPENED)`);
         }
 
         if (type === "ticket") {
@@ -570,15 +574,22 @@ router.get("/activity", adminMiddleware, async (req, res) => {
                 `action_type.ilike.%${search}%`,
             ];
 
-            if (isGlobal) {
-                const { data: matchingAdmins } = await supabase
+            const [{ data: matchingAdmins }, { data: matchingUsers }] = await Promise.all([
+                supabase
                     .from("admin_users")
                     .select("id")
-                    .or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
-                const matchingIds = (matchingAdmins || []).map((a) => a.id);
-                if (matchingIds.length > 0) {
-                    orConditions.push(`admin_id.in.(${matchingIds.join(",")})`);
-                }
+                    .or(`full_name.ilike.%${search}%,email.ilike.%${search}%`),
+                supabase
+                    .from("auth_users")
+                    .select("id")
+                    .or(`full_name.ilike.%${search}%,email.ilike.%${search}%`),
+            ]);
+            const matchingIds = [
+                ...(matchingAdmins || []).map((a) => a.id),
+                ...(matchingUsers || []).map((u) => u.id),
+            ];
+            if (matchingIds.length > 0) {
+                orConditions.push(`admin_id.in.(${matchingIds.join(",")})`);
             }
 
             query = query.or(orConditions.join(","));
@@ -592,24 +603,43 @@ router.get("/activity", adminMiddleware, async (req, res) => {
 
         if (error) return res.status(400).json({ success: false, message: error.message });
 
-        const adminIds = [...new Set((data || []).map((l) => l.admin_id).filter(Boolean))];
-        let adminMap = {};
+        const actorIds = [...new Set((data || []).map((l) => l.admin_id).filter(Boolean))];
+        let actorMap = {};
 
-        if (adminIds.length > 0) {
+        if (actorIds.length > 0) {
             const { data: admins } = await supabase
                 .from("admin_users")
                 .select("id, full_name, email, admin_level")
-                .in("id", adminIds);
+                .in("id", actorIds);
 
             for (const a of admins || []) {
-                adminMap[a.id] = a;
+                actorMap[a.id] = { ...a, is_user: false };
+            }
+
+            const userIds = actorIds.filter((id) => !actorMap[id]);
+            if (userIds.length > 0) {
+                const { data: users } = await supabase
+                    .from("auth_users")
+                    .select("id, full_name, email")
+                    .in("id", userIds);
+
+                for (const u of users || []) {
+                    actorMap[u.id] = { ...u, is_user: true };
+                }
             }
         }
 
-        const enriched = (data || []).map((log) => ({
-            ...log,
-            admin: adminMap[log.admin_id] || null,
-        }));
+        const enriched = (data || []).map((log) => {
+            let actor = actorMap[log.admin_id] || null;
+            if (!actor && (log.metadata?.actor_name || log.metadata?.actor_email)) {
+                actor = {
+                    full_name: log.metadata.actor_name || null,
+                    email: log.metadata.actor_email || null,
+                    is_user: log.metadata?.actor_role === "user",
+                };
+            }
+            return { ...log, admin: actor, actor };
+        });
 
         return res.json({ success: true, data: enriched, total: count ?? 0 });
     } catch (e) {

@@ -12,7 +12,6 @@ import {
   Check,
   RefreshCw,
   XCircle,
-  Play,
   Download,
 } from "lucide-react";
 import { getApiBaseUrl } from "../../utils/apiBaseUrl";
@@ -902,7 +901,7 @@ export default function AdminAIAnalytics() {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             {/* Left: period tabs + date input */}
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
-              <div className="overflow-x-auto flex rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5">
+              <div className="overflow-x-auto flex rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-zinc-800/60 shadow-sm p-0.5 gap-0.5">
                 {PERIOD_TYPES.map((pt) => (
                   <ToggleBtn
                     key={pt.value}
@@ -956,10 +955,8 @@ export default function AdminAIAnalytics() {
                   }
                   className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg text-xs font-semibold whitespace-nowrap bg-lpu-maroon text-white border border-lpu-maroon hover:bg-lpu-gold hover:text-lpu-maroon hover:border-lpu-gold active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  {analyzing ? (
+                  {analyzing && (
                     <RefreshCw size={11} className="animate-spin" />
-                  ) : (
-                    <Play size={16} />
                   )}
                   Analyze
                 </button>

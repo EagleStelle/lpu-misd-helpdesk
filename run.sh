@@ -39,17 +39,13 @@ scaffold_env() {
     cp "$ROOT/.env.example" "$ROOT/.env"
     yellow "Created .env from .env.example — fill in real values."
   fi
-  if [ ! -f "$ROOT/backend/.env" ] && [ -f "$ROOT/backend/.env.example" ]; then
-    cp "$ROOT/backend/.env.example" "$ROOT/backend/.env"
-    yellow "Created backend/.env from backend/.env.example — fill in real values."
-  fi
 }
 
 # Fail fast if env files missing or still hold placeholder values.
 require_env() {
   local missing=0
-  if [ ! -f "$ROOT/backend/.env" ]; then
-    red "backend/.env missing. Run ./run.sh setup and fill in real values."
+  if [ ! -f "$ROOT/.env" ]; then
+    red ".env missing. Run ./run.sh setup and fill in real values."
     missing=1
   fi
   if [ "$missing" -ne 0 ]; then exit 1; fi
@@ -82,7 +78,7 @@ setup() {
   check_node
   scaffold_env
   install_deps install
-  green "Setup done. Edit .env and backend/.env, then run: ./run.sh dev"
+  green "Setup done. Edit .env, then run: ./run.sh dev"
 }
 
 run_backend() {

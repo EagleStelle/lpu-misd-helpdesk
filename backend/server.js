@@ -1,9 +1,12 @@
 /* global process */
+import "./config/env.js";
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { initializeAdminUsers, initializeDatabase } from "./config/database.js";
 import { verifyAdminEmailFromToken } from "./services/authService.js";
 import authRoutes from "./routes/auth.js";
@@ -14,41 +17,72 @@ import knowledgeRoutes from "./routes/knowledge.js";
 import aiAnalyticsRoutes from "./routes/aiAnalytics.js";
 import os from "os";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const frontendDistDir =
+  process.env.FRONTEND_DIST_DIR || path.join(__dirname, "public");
+const frontendIndexPath = path.join(frontendDistDir, "index.html");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+app.set("trust proxy", 1);
 
 // Middleware
-const corsAllowList = (process.env.CORS_ORIGINS || "")
+const corsAllowList = [process.env.PUBLIC_BASE_URL, process.env.CORS_ORIGINS]
+  .filter(Boolean)
+  .join(",")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 
+const getOriginHost = (origin) => {
+  try {
+    return new URL(origin).host.toLowerCase();
+  } catch {
+    return "";
+  }
+};
+
+const getRequestHost = (req) =>
+  String(req.get("x-forwarded-host") || req.get("host") || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase();
+
 app.use(
-  cors({
-    origin(origin, callback) {
-      // Allow server-to-server / curl / same-origin
-      if (!origin) return callback(null, true);
+  cors((req, callback) => {
+    const origin = req.get("origin");
+    let allowedOrigin = false;
 
-      // Always allow localhost for dev
-      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
-        return callback(null, true);
-      }
+    // Allow server-to-server / curl / same-origin
+    if (!origin) {
+      allowedOrigin = true;
+    }
 
-      // Allow configured origins (e.g., your Vercel URL)
-      if (corsAllowList.length > 0 && corsAllowList.includes(origin)) {
-        return callback(null, true);
-      }
+    // Always allow localhost for dev
+    if (origin?.includes("localhost") || origin?.includes("127.0.0.1")) {
+      allowedOrigin = true;
+    }
 
-      // Allow Vercel deployments for this project only (exact prefix match)
-      if (/^https:\/\/lpu-misd-ticketing[\w-]*\.vercel\.app$/.test(origin)) {
-        return callback(null, true);
-      }
+    // Allow configured origins for split frontend/backend deployments.
+    if (corsAllowList.length > 0 && corsAllowList.includes(origin)) {
+      allowedOrigin = true;
+    }
 
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
-    credentials: true,
+    if (origin && getOriginHost(origin) === getRequestHost(req)) {
+      allowedOrigin = true;
+    }
+
+    // Allow Vercel deployments for this project only (exact prefix match)
+    if (origin && /^https:\/\/lpu-misd-ticketing[\w-]*\.vercel\.app$/.test(origin)) {
+      allowedOrigin = true;
+    }
+
+    callback(null, {
+      origin: allowedOrigin,
+      credentials: true,
+    });
   }),
 );
 app.use(bodyParser.json({ limit: "20mb" }));
@@ -99,6 +133,40 @@ app.use("/api/tickets", ticketRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/knowledge", knowledgeRoutes);
 app.use("/api/ai-analytics", aiAnalyticsRoutes);
+
+app.get("/env.js", (req, res) => {
+  const publicConfig = {
+    VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || "",
+    VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY || "",
+    VITE_PUBLIC_BASE_URL:
+      process.env.VITE_PUBLIC_BASE_URL || process.env.PUBLIC_BASE_URL || "",
+    VITE_API_BASE_URL_LOCAL: process.env.VITE_API_BASE_URL_LOCAL || "/",
+    VITE_API_BASE_URL_PROD: process.env.VITE_API_BASE_URL_PROD || "/",
+  };
+
+  const json = JSON.stringify(publicConfig).replace(/</g, "\\u003c");
+  res
+    .type("application/javascript")
+    .set("Cache-Control", "no-store")
+    .send(`window.__APP_CONFIG__ = ${json};`);
+});
+
+if (fs.existsSync(frontendIndexPath)) {
+  app.use(
+    express.static(frontendDistDir, {
+      index: "index.html",
+      setHeaders(res, filePath) {
+        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        }
+      },
+    }),
+  );
+
+  app.get(/^\/(?!api(?:\/|$)).*/, (req, res) => {
+    res.sendFile(frontendIndexPath);
+  });
+}
 
 // Root endpoint
 app.get("/", (req, res) => {
